@@ -3,265 +3,273 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM — Funil Comercial</title>
+<title>Pipeline CRM</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#0d0f14;--surface:#161921;--surface2:#1e222d;--border:#2a2f3d;--text:#e8eaf0;--muted:#6b7280;--accent:#f5a623;--green:#22c55e;--red:#ef4444; }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center}
-  .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:420px;max-width:95vw;animation:slideUp .25s ease}
-  .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-family:'DM Serif Display',serif;font-size:1.5rem}
-  .auth-logo-dot{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#000}
-  .auth-title{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:6px}
-  .auth-sub{font-size:.85rem;color:var(--muted);margin-bottom:28px}
-  .auth-err{color:var(--red);font-size:.82rem;margin-bottom:14px;display:none}
-  header{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
-  .logo{font-family:'DM Serif Display',serif;font-size:1.4rem;display:flex;align-items:center;gap:10px}
-  .logo-dot{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#000}
-  .header-right{display:flex;align-items:center;gap:12px}
-  .stats-pill{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:.78rem;color:var(--muted);display:flex;gap:18px}
-  .stats-pill strong{color:var(--text)}
-  .user-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px;cursor:pointer}
-  .user-badge:hover{border-color:var(--accent);color:var(--text)}
-  .btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;transition:all .15s}
-  .btn-primary{background:var(--accent);color:#000}
-  .btn-primary:hover{background:#f0b845;transform:translateY(-1px)}
-  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
-  .btn-ghost:hover{color:var(--text);border-color:var(--text)}
-  .btn-sm{padding:5px 12px;font-size:.78rem}
-  .toolbar{display:flex;align-items:center;gap:12px;padding:14px 32px;border-bottom:1px solid var(--border)}
-  .search-box{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;max-width:260px;flex:1}
-  .search-box input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;width:100%}
-  .search-box input::placeholder{color:var(--muted)}
-  .filter-sel{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.83rem;outline:none;cursor:pointer}
-  .spacer{flex:1}
-  .summary-bar{display:flex;gap:1px;height:4px;margin:0 32px 20px;border-radius:4px;overflow:hidden}
-  .summary-seg{transition:flex .3s}
-  .board-wrap{padding:0 32px 32px;overflow-x:auto}
-  .board{display:flex;gap:16px;min-width:max-content}
-  .col{width:282px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
-  .col-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;border-top:3px solid var(--c);background:var(--surface)}
-  .col-header-left{display:flex;align-items:center;gap:8px}
-  .col-dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
-  .col-name{font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--c)}
-  .col-count{font-size:.72rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:2px 7px;color:var(--muted)}
-  .col-val{font-size:.75rem;color:var(--muted)}
-  .col-body{display:flex;flex-direction:column;gap:8px;min-height:80px;padding:2px 0;transition:all .15s}
-  .col-body.drag-over{background:rgba(245,166,35,.05);border-radius:8px;outline:2px dashed rgba(245,166,35,.3)}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:grab;position:relative;transition:all .15s;animation:fadeIn .22s ease}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-  .card:hover{border-color:#3a4050;transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.35)}
-  .card.dragging{opacity:.35;cursor:grabbing}
-  .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-  .card-company{font-size:.9rem;font-weight:600;line-height:1.2}
-  .card-contact{font-size:.77rem;color:var(--muted);margin-top:2px}
-  .card-val{font-size:.85rem;font-weight:600;color:var(--accent);white-space:nowrap}
-  .card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
-  .tag{font-size:.68rem;padding:2px 8px;border-radius:20px;border:1px solid}
-  .tag-high{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08)}
-  .tag-med{color:var(--accent);border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.08)}
-  .tag-low{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
-  .tag-src{color:var(--muted);border-color:var(--border);background:var(--surface2)}
-  .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-  .avatar{width:24px;height:24px;border-radius:50%;font-size:.63rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;color:#000}
-  .card-date{font-size:.72rem;color:var(--muted)}
-  .card-date.overdue{color:var(--red)}
-  .card-actions{position:absolute;top:8px;right:8px;display:none;gap:4px}
-  .card:hover .card-actions{display:flex}
-  .icon-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .1s}
-  .icon-btn:hover{color:var(--text);border-color:var(--text)}
-  .add-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;width:100%;transition:all .15s}
-  .add-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(245,166,35,.05)}
-  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;backdrop-filter:blur(4px);align-items:center;justify-content:center}
-  .overlay.open{display:flex}
-  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:slideUp .2s ease}
-  @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border)}
-  .modal-title{font-family:'DM Serif Display',serif;font-size:1.1rem}
-  .modal-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .1s}
-  .modal-close:hover{color:var(--text)}
-  .modal-body{padding:20px 24px}
-  .fg{margin-bottom:16px}
-  .fg label{display:block;font-size:.74rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
-  .fg input,.fg select,.fg textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.87rem;outline:none;transition:border-color .15s}
-  .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent)}
-  .fg textarea{resize:vertical;min-height:80px}
-  .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-  .detail-panel{display:none;position:fixed;right:0;top:0;bottom:0;width:400px;background:var(--surface);border-left:1px solid var(--border);z-index:150;flex-direction:column;overflow-y:auto;animation:slideRight .2s ease}
-  @keyframes slideRight{from{transform:translateX(100%)}to{transform:none}}
-  .detail-panel.open{display:flex}
-  .detail-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-  .detail-company{font-family:'DM Serif Display',serif;font-size:1.3rem}
-  .detail-contact{font-size:.85rem;color:var(--muted);margin-top:4px}
-  .detail-body{padding:20px 24px;flex:1}
-  .detail-section{margin-bottom:20px}
-  .detail-section h4{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
-  .detail-row{display:flex;justify-content:space-between;font-size:.84rem;padding:7px 0;border-bottom:1px solid var(--border)}
-  .detail-row:last-child{border-bottom:none}
-  .detail-row span:first-child{color:var(--muted)}
-  .note-area{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;resize:vertical;min-height:80px;outline:none}
-  .note-area:focus{border-color:var(--accent)}
-  .act-item{display:flex;gap:10px;padding:7px 0;font-size:.81rem;border-bottom:1px solid var(--border)}
-  .act-item:last-child{border-bottom:none}
-  .act-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0}
-  .act-text{color:var(--muted);line-height:1.4}
-  .loading-overlay{display:none;position:fixed;inset:0;background:rgba(13,15,20,.85);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-  .loading-overlay.show{display:flex}
-  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .loading-text{color:var(--muted);font-size:.85rem}
-  .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:.85rem;z-index:9999;transform:translateY(80px);opacity:0;transition:all .25s ease}
-  .toast.show{transform:none;opacity:1}
-  .toast.ok{border-color:var(--green);color:var(--green)}
-  .toast.err{border-color:var(--red);color:var(--red)}
+:root{--bg:#0d0f14;--surface:#161921;--surface2:#1e222d;--border:#2a2f3d;--text:#e8eaf0;--muted:#6b7280;--accent:#f5a623;--green:#22c55e;--red:#ef4444;--blue:#38bdf8;--purple:#a855f7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+/* SIDEBAR */
+.sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-family:'DM Serif Display',serif;font-size:1.2rem}
+.logo-dot{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#000;flex-shrink:0}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:.85rem;color:var(--muted);transition:all .15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(245,166,35,.12);color:var(--accent)}
+.nav-icon{font-size:1rem;width:20px;text-align:center}
+.nav-section{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:12px 12px 6px;opacity:.6}
+.sidebar-bottom{padding:12px 8px;border-top:1px solid var(--border)}
+.user-info{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:all .15s}
+.user-info:hover{background:var(--surface2)}
+.user-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#000;flex-shrink:0}
+.user-name{font-size:.82rem;font-weight:500}
+.user-role{font-size:.7rem;color:var(--muted)}
+/* MAIN */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.page-title{font-family:'DM Serif Display',serif;font-size:1.3rem}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.content{padding:24px 28px;flex:1}
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);width:100%}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:420px;max-width:95vw}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-family:'DM Serif Display',serif;font-size:1.5rem}
+.auth-title{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:6px}
+.auth-sub{font-size:.85rem;color:var(--muted);margin-bottom:24px}
+.auth-err{color:var(--red);font-size:.82rem;margin-bottom:14px;display:none;padding:8px 12px;background:rgba(239,68,68,.1);border-radius:6px;border:1px solid rgba(239,68,68,.2)}
+/* BUTTONS */
+.btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;transition:all .15s}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:#f0b845;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--text)}
+.btn-danger{background:var(--red);color:#fff;border:none}
+.btn-danger:hover{background:#dc2626}
+.btn-sm{padding:5px 12px;font-size:.78rem}
+.btn-icon{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:.85rem;transition:all .1s}
+.btn-icon:hover{color:var(--text);border-color:var(--text)}
+/* FORMS */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:.74rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.87rem;outline:none;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent)}
+.fg textarea{resize:vertical;min-height:80px}
+.fg select option{background:var(--surface2)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+/* CARDS/TABLES */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-sm{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.stat-value{font-size:1.5rem;font-weight:600;font-family:'DM Serif Display',serif}
+.stat-sub{font-size:.75rem;color:var(--muted);margin-top:4px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;font-size:.84rem;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:500;border:1px solid}
+.badge-green{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
+.badge-red{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08)}
+.badge-blue{color:var(--blue);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.08)}
+.badge-purple{color:var(--purple);border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.08)}
+.badge-amber{color:var(--accent);border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.08)}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;backdrop-filter:blur(4px);align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:slideUp .2s ease}
+.modal-sm{width:400px}
+.modal-lg{width:640px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border)}
+.modal-title{font-family:'DM Serif Display',serif;font-size:1.1rem}
+.modal-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+/* BOARD */
+.board-wrap{overflow-x:auto;padding-bottom:8px}
+.board{display:flex;gap:14px;min-width:max-content}
+.col{width:275px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.col-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;border-top:3px solid var(--c);background:var(--surface)}
+.col-header-left{display:flex;align-items:center;gap:8px}
+.col-dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.col-name{font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--c)}
+.col-count{font-size:.7rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px;color:var(--muted)}
+.col-val{font-size:.73rem;color:var(--muted)}
+.col-body{display:flex;flex-direction:column;gap:7px;min-height:60px;padding:2px 0;transition:all .15s}
+.col-body.drag-over{background:rgba(245,166,35,.05);border-radius:8px;outline:2px dashed rgba(245,166,35,.3)}
+.deal-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:grab;position:relative;transition:all .15s;animation:fadeIn .2s ease}
+.deal-card:hover{border-color:#3a4050;transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.deal-card.dragging{opacity:.3;cursor:grabbing}
+.deal-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.deal-company{font-size:.87rem;font-weight:600;line-height:1.2;padding-right:44px}
+.deal-contact{font-size:.74rem;color:var(--muted);margin-top:2px}
+.deal-val{font-size:.82rem;font-weight:600;color:var(--accent);white-space:nowrap}
+.deal-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px}
+.tag{font-size:.66rem;padding:2px 7px;border-radius:20px;border:1px solid}
+.tag-high{color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08)}
+.tag-med{color:var(--accent);border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.08)}
+.tag-low{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
+.tag-src{color:var(--muted);border-color:var(--border);background:var(--surface2)}
+.deal-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.avatar{width:22px;height:22px;border-radius:50%;font-size:.58rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;color:#000}
+.card-date{font-size:.7rem;color:var(--muted)}
+.card-date.overdue{color:var(--red)}
+.card-actions{position:absolute;top:8px;right:8px;display:none;gap:3px}
+.deal-card:hover .card-actions{display:flex}
+.add-btn{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:8px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer;width:100%;transition:all .15s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(245,166,35,.05)}
+/* DETAIL PANEL */
+.detail-panel{display:none;position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);z-index:150;flex-direction:column;overflow-y:auto;animation:slideRight .2s ease}
+.detail-panel.open{display:flex}
+.detail-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.detail-company{font-family:'DM Serif Display',serif;font-size:1.2rem}
+.detail-contact{font-size:.82rem;color:var(--muted);margin-top:3px}
+.detail-body{padding:18px 20px;flex:1}
+.detail-section{margin-bottom:18px}
+.detail-section h4{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.detail-row{display:flex;justify-content:space-between;font-size:.82rem;padding:6px 0;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.detail-row span:first-child{color:var(--muted)}
+.note-area{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.83rem;resize:vertical;min-height:80px;outline:none}
+.note-area:focus{border-color:var(--accent)}
+.act-item{display:flex;gap:8px;padding:6px 0;font-size:.79rem;border-bottom:1px solid var(--border)}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0}
+.act-text{color:var(--muted);line-height:1.4}
+/* META PROGRESS */
+.meta-bar-wrap{margin-top:6px}
+.meta-bar-bg{background:var(--surface2);border-radius:4px;height:6px;overflow:hidden}
+.meta-bar-fill{height:100%;border-radius:4px;transition:width .4s}
+.meta-pct{font-size:.72rem;color:var(--muted);margin-top:3px}
+/* LOADING / TOAST */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(13,15,20,.85);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.loading-overlay.show{display:flex}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 18px;font-size:.84rem;z-index:9999;transform:translateY(80px);opacity:0;transition:all .25s ease;max-width:300px}
+.toast.show{transform:none;opacity:1}
+.toast.ok{border-color:var(--green);color:var(--green)}
+.toast.err{border-color:var(--red);color:var(--red)}
+/* SUMMARY BAR */
+.summary-bar{display:flex;gap:1px;height:4px;border-radius:4px;overflow:hidden;margin-bottom:20px}
+.summary-seg{transition:flex .3s}
+/* UTILS */
+.flex{display:flex;align-items:center}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.gap8{gap:8px}
+.gap12{gap:12px}
+.mb16{margin-bottom:16px}
+.mb24{margin-bottom:24px}
+.text-muted{color:var(--muted)}
+.text-accent{color:var(--accent)}
+.text-green{color:var(--green)}
+.text-red{color:var(--red)}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-title{font-family:'DM Serif Display',serif;font-size:1.1rem}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:.4}
+.empty-state p{font-size:.85rem}
+.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px 7px 34px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.84rem;outline:none;transition:border-color .15s;width:240px}
+.search-input:focus{border-color:var(--accent)}
+.search-wrap{position:relative}
+.search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:.8rem;pointer-events:none}
+.filter-sel{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;cursor:pointer}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes slideRight{from{transform:translateX(100%)}to{transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="loading-text" id="loadingText">Carregando...</div>
+  <div style="color:var(--muted);font-size:.85rem" id="loadingText">Carregando...</div>
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- AUTH -->
-<div id="authWrap" class="auth-wrap">
+<!-- ═══ AUTH ═══ -->
+<div id="authWrap" class="auth-wrap" style="display:none">
   <div class="auth-box" id="loginBox">
-    <div class="auth-logo"><div class="auth-logo-dot">◆</div>Pipeline CRM</div>
+    <div class="auth-logo"><div class="logo-dot">◆</div>Pipeline CRM</div>
     <div class="auth-title">Entrar</div>
     <div class="auth-sub">Acesse sua conta para continuar</div>
     <div class="auth-err" id="loginErr"></div>
     <div class="fg"><label>E-mail</label><input type="email" id="lEmail" placeholder="seu@email.com"></div>
     <div class="fg"><label>Senha</label><input type="password" id="lSenha" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doLogin()">Entrar</button>
+    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Entrar</button>
   </div>
   <div class="auth-box" id="setupBox" style="display:none">
-    <div class="auth-logo"><div class="auth-logo-dot">◆</div>Pipeline CRM</div>
-    <div class="auth-title">Configuração inicial</div>
-    <div class="auth-sub">Crie o primeiro administrador do sistema</div>
+    <div class="auth-logo"><div class="logo-dot">◆</div>Pipeline CRM</div>
+    <div class="auth-title">Configuracao inicial</div>
+    <div class="auth-sub">Crie o administrador do sistema</div>
     <div class="auth-err" id="setupErr"></div>
     <div class="fg"><label>Nome</label><input id="sNome" placeholder="Seu nome completo"></div>
     <div class="fg"><label>E-mail</label><input type="email" id="sEmail" placeholder="admin@empresa.com"></div>
     <div class="fg"><label>Senha</label><input type="password" id="sSenha" placeholder="Minimo 6 caracteres"></div>
-    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doSetup()">Criar administrador</button>
+    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doSetup()">Criar administrador</button>
   </div>
 </div>
 
-<!-- APP -->
-<div id="appWrap" style="display:none">
-<header>
-  <div class="logo"><div class="logo-dot">◆</div>Pipeline CRM</div>
-  <div class="header-right">
-    <div class="stats-pill">
-      <span>Pipeline: <strong id="statTotal">—</strong></span>
-      <span>Negócios: <strong id="statDeals">—</strong></span>
-      <span>Taxa ganho: <strong id="statConv">—</strong></span>
+<!-- ═══ APP ═══ -->
+<div id="appWrap" style="display:none;width:100%">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo"><div class="logo-dot">◆</div>Pipeline CRM</div>
+  <div class="sidebar-nav" id="sidebarNav"></div>
+  <div class="sidebar-bottom">
+    <div class="user-info" onclick="openPerfilModal()">
+      <div class="user-avatar" id="sidebarAvatar"></div>
+      <div><div class="user-name" id="sidebarName"></div><div class="user-role" id="sidebarRole"></div></div>
     </div>
-    <button class="btn btn-primary" onclick="openModal()">+ Novo negócio</button>
-    <div class="user-badge" onclick="toggleUserMenu()" id="userBadge">
-      <span id="userBadgeName">—</span><span style="font-size:.7rem">▾</span>
-    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px;color:var(--red)" onclick="doLogout()">Sair</button>
   </div>
-</header>
-
-<div id="userMenu" style="display:none;position:fixed;top:64px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px;z-index:500;min-width:160px">
-  <div style="padding:8px 12px;font-size:.75rem;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px" id="userMenuRole"></div>
-  <button class="btn btn-ghost btn-sm" style="width:100%;text-align:left;margin-bottom:4px" onclick="openPerfilModal()">Meu perfil</button>
-  <button class="btn btn-ghost btn-sm" style="width:100%;text-align:left;color:var(--red)" onclick="doLogout()">Sair</button>
 </div>
 
-<div class="toolbar">
-  <div class="search-box">
-    <span style="color:var(--muted);font-size:.9rem">🔍</span>
-    <input type="text" placeholder="Buscar empresa, contato..." id="searchInput" oninput="renderBoard()">
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">Funil</div>
+    <div class="topbar-right" id="topbarRight"></div>
   </div>
-  <select class="filter-sel" id="filterResp" onchange="renderBoard()">
-    <option value="">Todos vendedores</option>
-  </select>
-  <select class="filter-sel" id="filterPrio" onchange="renderBoard()">
-    <option value="">Toda prioridade</option>
-    <option>Alta</option><option>Média</option><option>Baixa</option>
-  </select>
-  <div class="spacer"></div>
-  <button class="btn btn-ghost" onclick="loadData()">↻ Atualizar</button>
-  <button class="btn btn-ghost" onclick="exportCSV()">⬇ Exportar CSV</button>
+  <div class="content" id="mainContent"></div>
 </div>
 
-<div style="padding:16px 32px 0"><div class="summary-bar" id="summaryBar"></div></div>
-<div class="board-wrap"><div class="board" id="board"></div></div>
+</div><!-- end appWrap -->
 
-<!-- Modal Deal -->
-<div class="overlay" id="overlay" onclick="overlayClick(event)">
-  <div class="modal">
+<!-- ═══ MODALS ═══ -->
+
+<!-- Deal Modal -->
+<div class="overlay" id="dealOverlay" onclick="if(event.target===this)closeDealModal()">
+  <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Novo negócio</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-title" id="dealModalTitle">Novo negocio</div>
+      <button class="modal-close" onclick="closeDealModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="frow">
-        <div class="fg"><label>Empresa *</label><input id="fCompany" placeholder="Nome da empresa"></div>
-        <div class="fg"><label>Contato</label><input id="fContact" placeholder="Nome do contato"></div>
-      </div>
-      <div class="frow">
-        <div class="fg"><label>Cargo</label><input id="fRole" placeholder="Ex: Diretor de TI"></div>
-        <div class="fg"><label>E-mail</label><input type="email" id="fEmail" placeholder="contato@empresa.com"></div>
-      </div>
-      <div class="frow">
-        <div class="fg"><label>Telefone</label><input id="fPhone" placeholder="(00) 00000-0000"></div>
-        <div class="fg"><label>Servico</label>
-          <select id="fService">
-            <option value="">— Selecione —</option>
-            <option>Setup</option><option>Sustentacao</option><option>Desenvolvimento/IA</option>
-            <option>Acronis Backup</option><option>Acronis Seguranca</option><option>Renovacao</option>
-          </select>
-        </div>
-      </div>
-      <div class="frow">
-        <div class="fg"><label>Valor (R$)</label><input type="number" id="fValue" placeholder="0"></div>
-        <div class="fg"><label>Etapa</label>
-          <select id="fStage">
-            <option value="0">Prospeccao</option><option value="1">Qualificacao</option>
-            <option value="2">Proposta enviada</option><option value="3">Negociacao</option>
-            <option value="4">Fechado Ganho</option><option value="5">Perdido</option>
-          </select>
-        </div>
-      </div>
-      <div class="frow">
-        <div class="fg"><label>Responsavel</label><select id="fResp"></select></div>
-        <div class="fg"><label>Prioridade</label>
-          <select id="fPrio"><option>Media</option><option>Alta</option><option>Baixa</option></select>
-        </div>
-      </div>
-      <div class="frow">
-        <div class="fg"><label>Proximo contato</label><input type="date" id="fDate"></div>
-        <div class="fg"><label>Fonte</label>
-          <select id="fSource">
-            <option>Indicacao</option><option>Site</option><option>LinkedIn</option>
-            <option>Prospeccao ativa</option><option>Evento</option><option>Outro</option>
-          </select>
-        </div>
-      </div>
-      <div class="fg"><label>Observacoes</label><textarea id="fNotes" placeholder="Detalhes sobre o negocio..."></textarea></div>
+      <div class="frow"><div class="fg"><label>Empresa *</label><input id="dCompany" placeholder="Nome da empresa"></div><div class="fg"><label>Contato</label><input id="dContact" placeholder="Nome do contato"></div></div>
+      <div class="frow"><div class="fg"><label>Cargo</label><input id="dRole" placeholder="Ex: Diretor de TI"></div><div class="fg"><label>E-mail</label><input type="email" id="dEmail" placeholder="contato@empresa.com"></div></div>
+      <div class="frow"><div class="fg"><label>Telefone</label><input id="dPhone" placeholder="(00) 00000-0000"></div><div class="fg"><label>Servico</label><select id="dService"><option value="">— Selecione —</option><option>Setup</option><option>Sustentacao</option><option>Desenvolvimento/IA</option><option>Acronis Backup</option><option>Acronis Seguranca</option><option>Renovacao</option></select></div></div>
+      <div class="frow"><div class="fg"><label>Valor (R$)</label><input type="number" id="dValue" placeholder="0"></div><div class="fg"><label>Etapa</label><select id="dStage"><option value="0">Prospeccao</option><option value="1">Qualificacao</option><option value="2">Proposta enviada</option><option value="3">Negociacao</option><option value="4">Fechado Ganho</option><option value="5">Perdido</option></select></div></div>
+      <div class="frow"><div class="fg"><label>Responsavel</label><select id="dResp"></select></div><div class="fg"><label>Prioridade</label><select id="dPrio"><option>Media</option><option>Alta</option><option>Baixa</option></select></div></div>
+      <div class="frow"><div class="fg"><label>Proximo contato</label><input type="date" id="dDate"></div><div class="fg"><label>Fonte</label><select id="dSource"><option>Indicacao</option><option>Site</option><option>LinkedIn</option><option>Prospeccao ativa</option><option>Evento</option><option>Outro</option></select></div></div>
+      <div class="fg"><label>Observacoes</label><textarea id="dNotes"></textarea></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveDeal()">Salvar negocio</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeDealModal()">Cancelar</button><button class="btn btn-primary" onclick="saveDeal()">Salvar</button></div>
   </div>
 </div>
 
 <!-- Detail Panel -->
 <div class="detail-panel" id="detailPanel">
   <div class="detail-header">
-    <div>
-      <div class="detail-company" id="dpCompany"></div>
-      <div class="detail-contact" id="dpContact"></div>
-    </div>
+    <div><div class="detail-company" id="dpCompany"></div><div class="detail-contact" id="dpContact"></div></div>
     <div style="display:flex;gap:6px;flex-shrink:0">
-      <button class="icon-btn" onclick="editFromDetail()">✏️</button>
-      <button class="icon-btn" onclick="closeDetail()">✕</button>
+      <button class="btn-icon" onclick="editFromDetail()">✏️</button>
+      <button class="btn-icon" onclick="closeDetail()">✕</button>
     </div>
   </div>
   <div class="detail-body">
@@ -278,36 +286,81 @@
       <div class="detail-row"><span>E-mail</span><span id="dpEmail"></span></div>
       <div class="detail-row"><span>Telefone</span><span id="dpPhone"></span></div>
     </div>
-    <div class="detail-section">
-      <h4>Notas</h4>
-      <textarea class="note-area" id="dpNotes" placeholder="Adicione notas..." onblur="saveNote()"></textarea>
-    </div>
-    <div class="detail-section">
-      <h4>Historico</h4>
-      <div id="dpActivity"></div>
-    </div>
+    <div class="detail-section"><h4>Notas</h4><textarea class="note-area" id="dpNotes" onblur="saveNote()"></textarea></div>
+    <div class="detail-section"><h4>Historico</h4><div id="dpActivity"></div></div>
   </div>
 </div>
 
 <!-- Perfil Modal -->
 <div class="overlay" id="perfilOverlay" onclick="if(event.target===this)closePerfilModal()">
-  <div class="modal" style="width:380px">
-    <div class="modal-header">
-      <div class="modal-title">Meu perfil</div>
-      <button class="modal-close" onclick="closePerfilModal()">✕</button>
-    </div>
+  <div class="modal modal-sm">
+    <div class="modal-header"><div class="modal-title">Meu perfil</div><button class="modal-close" onclick="closePerfilModal()">✕</button></div>
     <div class="modal-body">
       <div class="auth-err" id="perfilErr"></div>
       <div class="fg"><label>Nome</label><input id="pNome"></div>
       <div class="fg"><label>E-mail</label><input type="email" id="pEmail"></div>
       <div class="fg"><label>Nova senha (vazio para nao alterar)</label><input type="password" id="pSenha" placeholder="••••••••"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closePerfilModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="savePerfil()">Salvar</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closePerfilModal()">Cancelar</button><button class="btn btn-primary" onclick="savePerfil()">Salvar</button></div>
   </div>
 </div>
+
+<!-- Vendedor Modal -->
+<div class="overlay" id="vendedorOverlay" onclick="if(event.target===this)closeVendedorModal()">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="vendedorModalTitle">Novo vendedor</div><button class="modal-close" onclick="closeVendedorModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="frow"><div class="fg"><label>Nome *</label><input id="vNome" placeholder="Nome completo"></div><div class="fg"><label>Cargo</label><input id="vCargo" placeholder="Ex: Consultor Comercial"></div></div>
+      <div class="frow"><div class="fg"><label>E-mail</label><input type="email" id="vEmail"></div><div class="fg"><label>Telefone</label><input id="vTelefone"></div></div>
+      <div class="fg"><label>Regioes</label><div id="vRegioes" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeVendedorModal()">Cancelar</button><button class="btn btn-primary" onclick="saveVendedor()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Usuario Modal -->
+<div class="overlay" id="usuarioOverlay" onclick="if(event.target===this)closeUsuarioModal()">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="usuarioModalTitle">Novo usuario</div><button class="modal-close" onclick="closeUsuarioModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="frow"><div class="fg"><label>Nome *</label><input id="uNome"></div><div class="fg"><label>E-mail *</label><input type="email" id="uEmail"></div></div>
+      <div class="frow"><div class="fg"><label>Senha *</label><input type="password" id="uSenha" placeholder="••••••••"></div><div class="fg"><label>Perfil</label><select id="uRole"><option value="vendedor">Vendedor</option><option value="gerente">Gerente</option><option value="diretor">Diretor</option></select></div></div>
+      <div class="fg"><label>Regioes (para gerente)</label><div id="uRegioes" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div></div>
+      <div class="fg"><label>Vincular ao vendedor</label><select id="uVendedor"><option value="">— Nenhum —</option></select></div>
+      <div class="fg"><label>Status</label><select id="uAtivo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeUsuarioModal()">Cancelar</button><button class="btn btn-primary" onclick="saveUsuario()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Meta Modal -->
+<div class="overlay" id="metaOverlay" onclick="if(event.target===this)closeMetaModal()">
+  <div class="modal modal-lg">
+    <div class="modal-header"><div class="modal-title" id="metaModalTitle">Definir meta</div><button class="modal-close" onclick="closeMetaModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="frow">
+        <div class="fg"><label>Vendedor *</label><select id="mVendedor"></select></div>
+        <div class="fg"><label>Quarter *</label><select id="mQuarter"><option>Q1 2026</option><option>Q2 2026</option><option>Q3 2026</option><option>Q4 2026</option><option>Q1 2027</option></select></div>
+      </div>
+      <div id="metaServicos"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeMetaModal()">Cancelar</button><button class="btn btn-primary" onclick="saveMeta()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Atividade Modal -->
+<div class="overlay" id="atividadeOverlay" onclick="if(event.target===this)closeAtividadeModal()">
+  <div class="modal modal-lg">
+    <div class="modal-header"><div class="modal-title" id="atividadeModalTitle">Nova atividade</div><button class="modal-close" onclick="closeAtividadeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="frow"><div class="fg"><label>Empresa</label><input id="aEmpresa" placeholder="Nome da empresa"></div><div class="fg"><label>Contato</label><input id="aContato" placeholder="Nome do contato"></div></div>
+      <div class="frow"><div class="fg"><label>Vendedor</label><select id="aVendedor"></select></div><div class="fg"><label>Tipo</label><select id="aTipo"><option>Ligacao</option><option>Email</option><option>Reuniao</option><option>Visita</option><option>WhatsApp</option><option>Demo</option><option>Proposta</option><option>Outro</option></select></div></div>
+      <div class="frow"><div class="fg"><label>Data</label><input type="date" id="aData"></div><div class="fg"><label>Negocio relacionado</label><select id="aNegocio"><option value="">— Nenhum —</option></select></div></div>
+      <div class="fg"><label>Observacao</label><textarea id="aObs" placeholder="O que foi discutido..."></textarea></div>
+      <div class="frow"><div class="fg"><label>Proximo passo</label><input id="aProxPasso" placeholder="Ex: Enviar proposta"></div><div class="fg"><label>Data proximo passo</label><input type="date" id="aProxData"></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeAtividadeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveAtividade()">Salvar</button></div>
+  </div>
 </div>
 
 <script>
@@ -317,25 +370,41 @@ const STAGES = [
   {name:'Proposta enviada',color:'#a855f7'},{name:'Negociacao',color:'#22c55e'},
   {name:'Fechado Ganho',color:'#10b981'},{name:'Perdido',color:'#ef4444'},
 ];
-let deals=[], vendedores=[], currentUser=null, editId=null, detailId=null, dragId=null;
-const fmt = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR');
+const SERVICOS = ['Setup','Sustentacao','Desenvolvimento/IA','Acronis Backup','Acronis Seguranca','Renovacao'];
+const REGIOES_DEFAULT = ['Nordeste','Sudeste'];
+
+let deals=[], vendedores=[], atividades=[], metas=[], usuarios=[], regioes=[];
+let currentUser=null, currentPage='funil';
+let editDealId=null, detailId=null, dragId=null;
+let editVendedorId=null, editUsuarioId=null, editAtividadeId=null;
+
+const fmt = v => 'R$ '+Number(v||0).toLocaleString('pt-BR');
 const today = () => new Date().toISOString().slice(0,10);
 const isOverdue = d => d && d < today();
 const token = () => localStorage.getItem('crm_token');
-const getHeaders = () => ({'Content-Type':'application/json','Authorization':'Bearer '+token()});
+const getH = () => ({'Content-Type':'application/json','Authorization':'Bearer '+token()});
 
-function showLoading(t){ document.getElementById('loadingText').textContent=t||'Carregando...'; document.getElementById('loadingOverlay').classList.add('show'); }
-function hideLoading(){ document.getElementById('loadingOverlay').classList.remove('show'); }
-function toast(msg,type='ok'){ const el=document.getElementById('toast'); el.textContent=msg; el.className='toast show '+type; setTimeout(()=>el.classList.remove('show'),3000); }
+function showLoad(t){document.getElementById('loadingText').textContent=t||'Carregando...';document.getElementById('loadingOverlay').classList.add('show')}
+function hideLoad(){document.getElementById('loadingOverlay').classList.remove('show')}
+function toast(msg,type='ok'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show '+type;setTimeout(()=>el.classList.remove('show'),3000)}
 
+function avatarColor(name){
+  const c=['#f5a623','#38bdf8','#a855f7','#22c55e','#ef4444','#06b6d4','#f43f5e','#84cc16'];
+  let h=0;for(let ch of(name||'?'))h=((h<<5)-h)+ch.charCodeAt(0);
+  return c[Math.abs(h)%c.length];
+}
+function initials(name){return(name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}
+
+// ══ AUTH ══
 async function init(){
-  showLoading('Iniciando...');
+  showLoad('Iniciando...');
   try{
     const r=await fetch(API+'/auth/check-setup');
     const d=await r.json();
-    if(!d.configured){ document.getElementById('loginBox').style.display='none'; document.getElementById('setupBox').style.display='block'; hideLoading(); return; }
-    if(token()) await loadApp(); else hideLoading();
-  }catch(e){ hideLoading(); toast('Erro ao conectar a API','err'); }
+    document.getElementById('authWrap').style.display='flex';
+    if(!d.configured){document.getElementById('loginBox').style.display='none';document.getElementById('setupBox').style.display='block';hideLoad();return}
+    if(token())await loadApp();else hideLoad();
+  }catch(e){hideLoad();document.getElementById('authWrap').style.display='flex';toast('Erro ao conectar API','err')}
 }
 
 async function doSetup(){
@@ -343,249 +412,264 @@ async function doSetup(){
   const email=document.getElementById('sEmail').value.trim();
   const senha=document.getElementById('sSenha').value;
   const err=document.getElementById('setupErr');
-  if(!nome||!email||!senha){ err.style.display='block'; err.textContent='Preencha todos os campos.'; return; }
-  showLoading('Configurando...');
+  if(!nome||!email||!senha){err.style.display='block';err.textContent='Preencha todos os campos.';return}
+  showLoad('Configurando...');
   try{
     const r=await fetch(API+'/auth/setup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,senha})});
-    const d=await r.json();
-    if(!r.ok) throw new Error(d.error);
-    localStorage.setItem('crm_token',d.token);
-    await loadApp();
-  }catch(e){ hideLoading(); err.style.display='block'; err.textContent=e.message; }
+    const d=await r.json();if(!r.ok)throw new Error(d.error);
+    localStorage.setItem('crm_token',d.token);await loadApp();
+  }catch(e){hideLoad();err.style.display='block';err.textContent=e.message}
 }
 
 async function doLogin(){
   const email=document.getElementById('lEmail').value.trim();
   const senha=document.getElementById('lSenha').value;
   const err=document.getElementById('loginErr');
-  if(!email||!senha){ err.style.display='block'; err.textContent='Preencha todos os campos.'; return; }
-  showLoading('Entrando...');
+  if(!email||!senha){err.style.display='block';err.textContent='Preencha todos os campos.';return}
+  showLoad('Entrando...');
   try{
     const r=await fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
-    const d=await r.json();
-    if(!r.ok) throw new Error(d.error);
-    localStorage.setItem('crm_token',d.token);
-    await loadApp();
-  }catch(e){ hideLoading(); err.style.display='block'; err.textContent=e.message||'Email ou senha invalidos'; }
+    const d=await r.json();if(!r.ok)throw new Error(d.error);
+    localStorage.setItem('crm_token',d.token);await loadApp();
+  }catch(e){hideLoad();err.style.display='block';err.textContent=e.message||'Email ou senha invalidos'}
 }
 
-function doLogout(){ localStorage.removeItem('crm_token'); location.reload(); }
+function doLogout(){localStorage.removeItem('crm_token');location.reload()}
 
 function parseToken(){
-  try{ const t=token(); if(!t)return null; return JSON.parse(atob(t.split('.')[1])); }catch{ return null; }
+  try{const t=token();if(!t)return null;return JSON.parse(atob(t.split('.')[1]))}catch{return null}
 }
 
 async function loadApp(){
   currentUser=parseToken();
-  if(!currentUser){ hideLoading(); return; }
+  if(!currentUser){hideLoad();return}
   document.getElementById('authWrap').style.display='none';
-  document.getElementById('appWrap').style.display='block';
-  document.getElementById('userBadgeName').textContent=currentUser.nome.split(' ')[0];
+  document.getElementById('appWrap').style.display='flex';
+  buildSidebar();
   await loadData();
+  navigateTo('funil');
 }
 
-async function loadData(){
-  showLoading('Carregando dados...');
-  try{
-    const [dr,vr]=await Promise.all([
-      fetch(API+'/deals',{headers:getHeaders()}),
-      fetch(API+'/vendedores',{headers:getHeaders()}),
-    ]);
-    if(dr.status===401){ doLogout(); return; }
-    deals=(await dr.json()).map(d=>({...d, activity:d.activity||[]}));
-    vendedores=await vr.json();
-    populateVendedorFilter();
-    renderBoard();
-    hideLoading();
-  }catch(e){ hideLoading(); toast('Erro ao carregar dados','err'); }
-}
-
-function populateVendedorFilter(){
-  const sel=document.getElementById('filterResp');
-  const fResp=document.getElementById('fResp');
-  sel.innerHTML='<option value="">Todos vendedores</option>';
-  fResp.innerHTML='';
-  const nomes=[...new Set(vendedores.map(v=>v.nome))];
-  nomes.forEach(n=>{ sel.innerHTML+=`<option>${n}</option>`; fResp.innerHTML+=`<option>${n}</option>`; });
-  if(!nomes.length) fResp.innerHTML='<option>Sem vendedores</option>';
-}
-
-function toggleUserMenu(){
-  const m=document.getElementById('userMenu');
-  m.style.display=m.style.display==='none'?'block':'none';
+// ══ SIDEBAR ══
+function buildSidebar(){
+  const u=currentUser;
+  const bg=avatarColor(u.nome);
+  document.getElementById('sidebarAvatar').style.background=bg;
+  document.getElementById('sidebarAvatar').textContent=initials(u.nome);
+  document.getElementById('sidebarName').textContent=u.nome.split(' ')[0];
   const roles={diretor:'Diretor',gerente:'Gerente',vendedor:'Vendedor'};
-  document.getElementById('userMenuRole').textContent=roles[currentUser?.role]||'';
-}
-document.addEventListener('click',e=>{ if(!e.target.closest('#userBadge')&&!e.target.closest('#userMenu')) document.getElementById('userMenu').style.display='none'; });
+  document.getElementById('sidebarRole').textContent=roles[u.role]||u.role;
 
-function avatarColor(name){
-  const colors=['#f5a623','#38bdf8','#a855f7','#22c55e','#ef4444','#06b6d4','#f43f5e','#84cc16'];
-  let h=0; for(let c of(name||'?'))h=((h<<5)-h)+c.charCodeAt(0);
-  return colors[Math.abs(h)%colors.length];
-}
+  const nav=document.getElementById('sidebarNav');
+  const pages=[
+    {id:'funil',icon:'📊',label:'Funil',roles:['diretor','gerente','vendedor']},
+    {id:'atividades',icon:'📋',label:'Atividades',roles:['diretor','gerente','vendedor']},
+    {id:'empresas',icon:'🏢',label:'Empresas',roles:['diretor','gerente','vendedor']},
+    {id:'metas',icon:'🎯',label:'Metas',roles:['diretor','gerente','vendedor']},
+    {id:'vendedores',icon:'👥',label:'Vendedores',roles:['diretor','gerente']},
+    {id:'usuarios',icon:'🔐',label:'Usuarios',roles:['diretor']},
+  ];
 
-function renderBoard(){
-  const q=document.getElementById('searchInput').value.toLowerCase();
-  const rf=document.getElementById('filterResp').value;
-  const pf=document.getElementById('filterPrio').value;
-  const filtered=deals.filter(d=>(!q||(d.company||'').toLowerCase().includes(q)||(d.contact||'').toLowerCase().includes(q))&&(!rf||d.resp===rf)&&(!pf||d.prio===pf));
-  const board=document.getElementById('board');
-  board.innerHTML='';
-  STAGES.forEach((stage,si)=>{
-    const cards=filtered.filter(d=>d.stage===si);
-    const totalVal=cards.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
-    const col=document.createElement('div');
-    col.className='col';
-    col.innerHTML=`
-      <div class="col-header" style="--c:${stage.color}">
-        <div class="col-header-left"><div class="col-dot"></div><div class="col-name">${stage.name}</div><div class="col-count">${cards.length}</div></div>
-        <div class="col-val">${fmt(totalVal)}</div>
-      </div>
-      <div class="col-body" id="col-${si}" ondragover="dragOver(event,${si})" ondrop="drop(event,${si})" ondragleave="document.getElementById('col-${si}').classList.remove('drag-over')">
-        ${cards.map(cardHTML).join('')}
-      </div>
-      <button class="add-btn" onclick="openModal(${si})">+ Adicionar negocio</button>
-    `;
-    board.appendChild(col);
+  nav.innerHTML='';
+  pages.filter(p=>p.roles.includes(u.role)).forEach(p=>{
+    const btn=document.createElement('button');
+    btn.className='nav-item';btn.id='nav-'+p.id;
+    btn.innerHTML=`<span class="nav-icon">${p.icon}</span>${p.label}`;
+    btn.onclick=()=>navigateTo(p.id);
+    nav.appendChild(btn);
   });
-  updateStats(filtered);
-  updateSummaryBar(filtered);
 }
 
-function cardHTML(d){
-  const initials=(d.resp||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  const bg=avatarColor(d.resp);
-  const prioC=d.prio==='Alta'?'tag-high':d.prio==='Baixa'?'tag-low':'tag-med';
-  const overdue=isOverdue(d.date);
-  const dateStr=d.date?new Date(d.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
-  return `<div class="card" draggable="true" ondragstart="dragStart(event,${d.id})" ondragend="dragEnd(event)" onclick="openDetail(${d.id})">
-    <div class="card-actions">
-      <button class="icon-btn" onclick="event.stopPropagation();openEditModal(${d.id})">✏</button>
-      <button class="icon-btn" onclick="event.stopPropagation();deleteDeal(${d.id})">🗑</button>
-    </div>
-    <div class="card-top">
-      <div><div class="card-company">${d.company}</div><div class="card-contact">${d.contact||''}</div></div>
-      <div class="card-val">${fmt(d.value)}</div>
-    </div>
-    <div class="card-tags">
-      <span class="tag ${prioC}">${d.prio||'Media'}</span>
-      ${d.service?`<span class="tag tag-src">${d.service}</span>`:''}
-      ${d.source?`<span class="tag tag-src">${d.source}</span>`:''}
-    </div>
-    <div class="card-footer">
-      <div class="avatar" style="background:${bg}">${initials}</div>
-      <div class="card-date ${overdue?'overdue':''}">${overdue?'⚠ ':'📅 '}${dateStr}</div>
-    </div>
-  </div>`;
+function navigateTo(page){
+  currentPage=page;
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('nav-'+page);
+  if(btn)btn.classList.add('active');
+  const titles={funil:'Funil Comercial',atividades:'Atividades',empresas:'Empresas',metas:'Metas',vendedores:'Vendedores',usuarios:'Usuarios'};
+  document.getElementById('pageTitle').textContent=titles[page]||page;
+  closeDetail();
+  const renders={funil:renderFunil,atividades:renderAtividades,empresas:renderEmpresas,metas:renderMetas,vendedores:renderVendedores,usuarios:renderUsuarios};
+  if(renders[page])renders[page]();
 }
 
-function updateStats(f){
-  const total=f.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
-  const won=f.filter(d=>d.stage===4).reduce((s,d)=>s+(parseFloat(d.value)||0),0);
-  const conv=total>0?Math.round(won/total*100):0;
-  document.getElementById('statTotal').textContent=fmt(total);
-  document.getElementById('statDeals').textContent=f.length;
-  document.getElementById('statConv').textContent=conv+'%';
-}
-
-function updateSummaryBar(f){
-  const total=f.length||1;
-  document.getElementById('summaryBar').innerHTML=STAGES.map((s,i)=>{
-    const c=f.filter(d=>d.stage===i).length;
-    return `<div class="summary-seg" style="background:${s.color};opacity:${0.35+c/total*0.65};flex:${c||0.15}"></div>`;
-  }).join('');
-}
-
-function dragStart(e,id){ dragId=id; setTimeout(()=>e.target.classList.add('dragging'),0); }
-function dragEnd(e){ e.target.classList.remove('dragging'); }
-function dragOver(e,si){ e.preventDefault(); document.getElementById('col-'+si).classList.add('drag-over'); }
-
-async function drop(e,si){
-  e.preventDefault();
-  document.getElementById('col-'+si).classList.remove('drag-over');
-  const d=deals.find(x=>x.id===dragId);
-  if(d&&d.stage!==si){
-    d.stage=si;
-    d.activity=[...(d.activity||[]),`Movido para ${STAGES[si].name} em ${new Date().toLocaleDateString('pt-BR')}`];
-    renderBoard();
-    await apiPut(d);
-    if(detailId===dragId)openDetail(dragId);
+// ══ DATA ══
+async function loadData(){
+  showLoad('Carregando dados...');
+  try{
+    const endpoints=['deals','vendedores','atividades','metas','regioes'];
+    const results=await Promise.all(endpoints.map(e=>fetch(API+'/'+e,{headers:getH()}).then(r=>{if(r.status===401)throw new Error('401');return r.json()})));
+    deals=results[0].map(d=>({...d,activity:d.activity||[]}));
+    vendedores=results[1];
+    atividades=results[2];
+    metas=results[3];
+    regioes=results[4].length?results[4]:REGIOES_DEFAULT;
+    if(currentUser.role==='diretor'){
+      const ur=await fetch(API+'/usuarios',{headers:getH()});
+      usuarios=await ur.json();
+    }
+    hideLoad();
+  }catch(e){
+    hideLoad();
+    if(e.message==='401'){doLogout();return}
+    toast('Erro ao carregar dados','err');
   }
 }
 
-function openModal(stage=0){
-  editId=null;
-  document.getElementById('modalTitle').textContent='Novo negocio';
-  ['fCompany','fContact','fRole','fEmail','fPhone','fNotes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fValue').value='';
-  document.getElementById('fStage').value=stage;
-  document.getElementById('fPrio').value='Media';
-  document.getElementById('fDate').value='';
-  document.getElementById('fSource').value='Indicacao';
-  document.getElementById('fService').value='';
-  document.getElementById('overlay').classList.add('open');
+// ══ FUNIL ══
+function renderFunil(){
+  const c=document.getElementById('mainContent');
+  const total=deals.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
+  const won=deals.filter(d=>d.stage===4).reduce((s,d)=>s+(parseFloat(d.value)||0),0);
+  const conv=total>0?Math.round(won/total*100):0;
+
+  c.innerHTML=`
+    <div class="flex-between mb16">
+      <div class="flex gap12">
+        <div class="search-wrap"><input class="search-input" id="fuSearchInput" placeholder="Buscar empresa..." oninput="renderFunilBoard()"></div>
+        <select class="filter-sel" id="fuFilterResp" onchange="renderFunilBoard()"><option value="">Todos vendedores</option>${vendedores.map(v=>`<option>${v.nome}</option>`).join('')}</select>
+        <select class="filter-sel" id="fuFilterPrio" onchange="renderFunilBoard()"><option value="">Toda prioridade</option><option>Alta</option><option>Media</option><option>Baixa</option></select>
+      </div>
+      <div class="flex gap8">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.76rem;color:var(--muted);display:flex;gap:14px">
+          <span>Pipeline: <strong style="color:var(--text)">${fmt(total)}</strong></span>
+          <span>Negocios: <strong style="color:var(--text)">${deals.length}</strong></span>
+          <span>Taxa ganho: <strong style="color:var(--text)">${conv}%</strong></span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openDealModal()">+ Novo negocio</button>
+      </div>
+    </div>
+    <div class="summary-bar" id="fuSummaryBar"></div>
+    <div class="board-wrap"><div class="board" id="fuBoard"></div></div>
+  `;
+  renderFunilBoard();
 }
 
-function openEditModal(id){
-  const d=deals.find(x=>x.id===id); if(!d)return;
-  editId=id;
-  document.getElementById('modalTitle').textContent='Editar negocio';
-  document.getElementById('fCompany').value=d.company;
-  document.getElementById('fContact').value=d.contact||'';
-  document.getElementById('fRole').value=d.role||'';
-  document.getElementById('fEmail').value=d.email||'';
-  document.getElementById('fPhone').value=d.phone||'';
-  document.getElementById('fValue').value=d.value||'';
-  document.getElementById('fStage').value=d.stage;
-  document.getElementById('fResp').value=d.resp||'';
-  document.getElementById('fPrio').value=d.prio||'Media';
-  document.getElementById('fDate').value=d.date||'';
-  document.getElementById('fSource').value=d.source||'Indicacao';
-  document.getElementById('fService').value=d.service||'';
-  document.getElementById('fNotes').value=d.notes||'';
-  document.getElementById('overlay').classList.add('open');
+function renderFunilBoard(){
+  const q=(document.getElementById('fuSearchInput')?.value||'').toLowerCase();
+  const rf=document.getElementById('fuFilterResp')?.value||'';
+  const pf=document.getElementById('fuFilterPrio')?.value||'';
+  const filtered=deals.filter(d=>(!q||(d.company||'').toLowerCase().includes(q)||(d.contact||'').toLowerCase().includes(q))&&(!rf||d.resp===rf)&&(!pf||d.prio===pf));
+
+  const board=document.getElementById('fuBoard');if(!board)return;
+  board.innerHTML='';
+  STAGES.forEach((stage,si)=>{
+    const cards=filtered.filter(d=>d.stage===si);
+    const tv=cards.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
+    const col=document.createElement('div');col.className='col';
+    col.innerHTML=`
+      <div class="col-header" style="--c:${stage.color}">
+        <div class="col-header-left"><div class="col-dot"></div><div class="col-name">${stage.name}</div><div class="col-count">${cards.length}</div></div>
+        <div class="col-val">${fmt(tv)}</div>
+      </div>
+      <div class="col-body" id="fcol-${si}" ondragover="fDragOver(event,${si})" ondrop="fDrop(event,${si})" ondragleave="document.getElementById('fcol-${si}').classList.remove('drag-over')">
+        ${cards.map(dealCardHTML).join('')}
+      </div>
+      <button class="add-btn" onclick="openDealModal(${si})">+ Adicionar negocio</button>
+    `;
+    board.appendChild(col);
+  });
+
+  const total=filtered.length||1;
+  document.getElementById('fuSummaryBar').innerHTML=STAGES.map((s,i)=>{
+    const cnt=filtered.filter(d=>d.stage===i).length;
+    return`<div class="summary-seg" style="background:${s.color};opacity:${0.35+cnt/total*0.65};flex:${cnt||0.15}"></div>`;
+  }).join('');
 }
 
-function overlayClick(e){ if(e.target===document.getElementById('overlay'))closeModal(); }
-function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+function dealCardHTML(d){
+  const ini=initials(d.resp||'?');
+  const bg=avatarColor(d.resp);
+  const prioC=d.prio==='Alta'?'tag-high':d.prio==='Baixa'?'tag-low':'tag-med';
+  const ov=isOverdue(d.date);
+  const ds=d.date?new Date(d.date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
+  return`<div class="deal-card" draggable="true" ondragstart="fDragStart(event,${d.id})" ondragend="fDragEnd(event)" onclick="openDetail(${d.id})">
+    <div class="card-actions"><button class="btn-icon" onclick="event.stopPropagation();openDealModal(null,${d.id})">✏</button><button class="btn-icon" onclick="event.stopPropagation();deleteDeal(${d.id})">🗑</button></div>
+    <div class="deal-card-top"><div><div class="deal-company">${d.company}</div><div class="deal-contact">${d.contact||''}</div></div><div class="deal-val">${fmt(d.value)}</div></div>
+    <div class="deal-tags"><span class="tag ${prioC}">${d.prio||'Media'}</span>${d.service?`<span class="tag tag-src">${d.service}</span>`:''}</div>
+    <div class="deal-footer"><div class="avatar" style="background:${bg}">${ini}</div><div class="card-date ${ov?'overdue':''}">${ov?'⚠ ':'📅 '}${ds}</div></div>
+  </div>`;
+}
+
+function fDragStart(e,id){dragId=id;setTimeout(()=>e.target.classList.add('dragging'),0)}
+function fDragEnd(e){e.target.classList.remove('dragging')}
+function fDragOver(e,si){e.preventDefault();document.getElementById('fcol-'+si).classList.add('drag-over')}
+async function fDrop(e,si){
+  e.preventDefault();document.getElementById('fcol-'+si).classList.remove('drag-over');
+  const d=deals.find(x=>x.id===dragId);
+  if(d&&d.stage!==si){
+    d.stage=si;d.activity=[...(d.activity||[]),`Movido para ${STAGES[si].name} em ${new Date().toLocaleDateString('pt-BR')}`];
+    renderFunilBoard();await apiPut('deals',d.id,d);if(detailId===dragId)openDetail(dragId);
+  }
+}
+
+// ══ DEAL MODAL ══
+function openDealModal(stage=0, editId=null){
+  editDealId=editId;
+  document.getElementById('dealModalTitle').textContent=editId?'Editar negocio':'Novo negocio';
+  const d=editId?deals.find(x=>x.id===editId):null;
+  document.getElementById('dCompany').value=d?.company||'';
+  document.getElementById('dContact').value=d?.contact||'';
+  document.getElementById('dRole').value=d?.role||'';
+  document.getElementById('dEmail').value=d?.email||'';
+  document.getElementById('dPhone').value=d?.phone||'';
+  document.getElementById('dValue').value=d?.value||'';
+  document.getElementById('dStage').value=d?.stage??stage;
+  document.getElementById('dPrio').value=d?.prio||'Media';
+  document.getElementById('dDate').value=d?.date||'';
+  document.getElementById('dSource').value=d?.source||'Indicacao';
+  document.getElementById('dService').value=d?.service||'';
+  document.getElementById('dNotes').value=d?.notes||'';
+  // populate resp
+  const sel=document.getElementById('dResp');
+  sel.innerHTML=vendedores.map(v=>`<option${v.nome===d?.resp?' selected':''}>${v.nome}</option>`).join('');
+  if(!sel.innerHTML)sel.innerHTML='<option>Sem vendedores</option>';
+  document.getElementById('dealOverlay').classList.add('open');
+}
+function closeDealModal(){document.getElementById('dealOverlay').classList.remove('open')}
 
 async function saveDeal(){
-  const company=document.getElementById('fCompany').value.trim();
-  if(!company){ toast('Informe o nome da empresa.','err'); return; }
+  const company=document.getElementById('dCompany').value.trim();
+  if(!company){toast('Informe o nome da empresa.','err');return}
   const payload={
-    company,contact:document.getElementById('fContact').value.trim(),
-    role:document.getElementById('fRole').value.trim(),email:document.getElementById('fEmail').value.trim(),
-    phone:document.getElementById('fPhone').value.trim(),value:parseFloat(document.getElementById('fValue').value)||0,
-    stage:parseInt(document.getElementById('fStage').value),resp:document.getElementById('fResp').value,
-    prio:document.getElementById('fPrio').value,date:document.getElementById('fDate').value||null,
-    source:document.getElementById('fSource').value,service:document.getElementById('fService').value,
-    notes:document.getElementById('fNotes').value,
+    company,contact:document.getElementById('dContact').value.trim(),
+    role:document.getElementById('dRole').value.trim(),email:document.getElementById('dEmail').value.trim(),
+    phone:document.getElementById('dPhone').value.trim(),value:parseFloat(document.getElementById('dValue').value)||0,
+    stage:parseInt(document.getElementById('dStage').value),resp:document.getElementById('dResp').value,
+    prio:document.getElementById('dPrio').value,date:document.getElementById('dDate').value||null,
+    source:document.getElementById('dSource').value,service:document.getElementById('dService').value,
+    notes:document.getElementById('dNotes').value,
   };
-  showLoading('Salvando...');
+  showLoad('Salvando...');
   try{
-    if(editId){
-      const ex=deals.find(x=>x.id===editId);
+    if(editDealId){
+      const ex=deals.find(x=>x.id===editDealId);
       payload.activity=ex&&ex.stage!==payload.stage?[...(ex.activity||[]),`Movido para ${STAGES[payload.stage].name} em ${new Date().toLocaleDateString('pt-BR')}`]:(ex?.activity||[]);
-      await fetch(API+'/deals/'+editId,{method:'PUT',headers:getHeaders(),body:JSON.stringify(payload)});
-      const idx=deals.findIndex(x=>x.id===editId); if(idx>=0)deals[idx]={...deals[idx],...payload};
+      await apiPut('deals',editDealId,payload);
+      const idx=deals.findIndex(x=>x.id===editDealId);if(idx>=0)deals[idx]={...deals[idx],...payload};
     }else{
       payload.activity=[`Negocio criado em ${new Date().toLocaleDateString('pt-BR')}`];
-      const r=await fetch(API+'/deals',{method:'POST',headers:getHeaders(),body:JSON.stringify(payload)});
-      const nd=await r.json(); deals.push({...nd,activity:payload.activity});
+      const r=await fetch(API+'/deals',{method:'POST',headers:getH(),body:JSON.stringify(payload)});
+      const nd=await r.json();deals.push({...nd,activity:payload.activity});
     }
-    closeModal(); renderBoard();
-    if(editId&&detailId===editId)openDetail(editId);
-    toast(editId?'Negocio atualizado':'Negocio criado'); hideLoading();
-  }catch(e){ hideLoading(); toast('Erro ao salvar','err'); }
+    closeDealModal();renderFunilBoard();
+    if(editDealId&&detailId===editDealId)openDetail(editDealId);
+    toast(editDealId?'Negocio atualizado':'Negocio criado');hideLoad();
+  }catch(e){hideLoad();toast('Erro ao salvar','err')}
 }
 
-async function apiPut(d){
-  try{ await fetch(API+'/deals/'+d.id,{method:'PUT',headers:getHeaders(),body:JSON.stringify(d)}); }
-  catch(e){ toast('Erro ao atualizar','err'); }
+async function deleteDeal(id){
+  if(!confirm('Excluir este negocio?'))return;
+  showLoad('Excluindo...');
+  try{
+    await fetch(API+'/deals/'+id,{method:'DELETE',headers:getH()});
+    deals=deals.filter(d=>d.id!==id);if(detailId===id)closeDetail();
+    renderFunilBoard();toast('Negocio excluido');hideLoad();
+  }catch(e){hideLoad();toast('Erro ao excluir','err')}
 }
 
+// ══ DETAIL ══
 function openDetail(id){
-  detailId=id; const d=deals.find(x=>x.id===id); if(!d)return;
+  detailId=id;const d=deals.find(x=>x.id===id);if(!d)return;
   document.getElementById('dpCompany').textContent=d.company;
   document.getElementById('dpContact').textContent=d.contact||'—';
   document.getElementById('dpVal').textContent=fmt(d.value);
@@ -599,58 +683,404 @@ function openDetail(id){
   document.getElementById('dpEmail').textContent=d.email||'—';
   document.getElementById('dpPhone').textContent=d.phone||'—';
   document.getElementById('dpNotes').value=d.notes||'';
-  document.getElementById('dpActivity').innerHTML=(d.activity||[]).map(a=>`<div class="act-item"><div class="act-dot"></div><div class="act-text">${a}</div></div>`).join('')||'<div style="color:var(--muted);font-size:.82rem">Nenhuma atividade ainda.</div>';
+  document.getElementById('dpActivity').innerHTML=(d.activity||[]).slice().reverse().map(a=>`<div class="act-item"><div class="act-dot"></div><div class="act-text">${a}</div></div>`).join('')||'<div style="color:var(--muted);font-size:.8rem">Nenhuma atividade.</div>';
   document.getElementById('detailPanel').classList.add('open');
 }
-
-function closeDetail(){ detailId=null; document.getElementById('detailPanel').classList.remove('open'); }
-function editFromDetail(){ if(detailId)openEditModal(detailId); }
-
+function closeDetail(){detailId=null;document.getElementById('detailPanel').classList.remove('open')}
+function editFromDetail(){if(detailId)openDealModal(null,detailId)}
 async function saveNote(){
-  if(!detailId)return; const d=deals.find(x=>x.id===detailId);
-  if(d){ d.notes=document.getElementById('dpNotes').value; await apiPut(d); }
+  if(!detailId)return;const d=deals.find(x=>x.id===detailId);
+  if(d){d.notes=document.getElementById('dpNotes').value;await apiPut('deals',d.id,d)}
 }
 
-async function deleteDeal(id){
-  if(!confirm('Excluir este negocio?'))return;
-  showLoading('Excluindo...');
+// ══ ATIVIDADES ══
+function renderAtividades(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML=`
+    <div class="section-header">
+      <div class="flex gap12">
+        <div class="search-wrap"><input class="search-input" id="atSearch" placeholder="Buscar empresa..." oninput="renderAtividadesTable()"></div>
+        <select class="filter-sel" id="atFilterVend" onchange="renderAtividadesTable()"><option value="">Todos vendedores</option>${vendedores.map(v=>`<option>${v.nome}</option>`).join('')}</select>
+        <select class="filter-sel" id="atFilterTipo" onchange="renderAtividadesTable()"><option value="">Todos tipos</option><option>Ligacao</option><option>Email</option><option>Reuniao</option><option>Visita</option><option>WhatsApp</option><option>Demo</option><option>Proposta</option><option>Outro</option></select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openAtividadeModal()">+ Nova atividade</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table><thead><tr><th>Empresa</th><th>Contato</th><th>Vendedor</th><th>Tipo</th><th>Data</th><th>Proximo passo</th><th></th></tr></thead>
+      <tbody id="atBody"></tbody></table>
+    </div>
+  `;
+  renderAtividadesTable();
+}
+
+function renderAtividadesTable(){
+  const q=(document.getElementById('atSearch')?.value||'').toLowerCase();
+  const vf=document.getElementById('atFilterVend')?.value||'';
+  const tf=document.getElementById('atFilterTipo')?.value||'';
+  const filtered=atividades.filter(a=>
+    (!q||(a.empresa||'').toLowerCase().includes(q)||(a.contato||'').toLowerCase().includes(q))&&
+    (!vf||a.vendedor===vf)&&(!tf||a.tipo===tf)
+  ).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+
+  const tbody=document.getElementById('atBody');if(!tbody)return;
+  if(!filtered.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><p>Nenhuma atividade encontrada</p></div></td></tr>`;return}
+  tbody.innerHTML=filtered.map(a=>`
+    <tr>
+      <td><strong>${a.empresa||'—'}</strong></td>
+      <td>${a.contato||'—'}</td>
+      <td>${a.vendedor||'—'}</td>
+      <td><span class="badge badge-blue">${a.tipo||'—'}</span></td>
+      <td>${a.data?new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.proximo_passo||'—'}</td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn-icon" onclick="openAtividadeModal(${a.id})">✏</button>
+        <button class="btn-icon" onclick="deleteAtividade(${a.id})">🗑</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function openAtividadeModal(editId=null){
+  editAtividadeId=editId;
+  document.getElementById('atividadeModalTitle').textContent=editId?'Editar atividade':'Nova atividade';
+  const a=editId?atividades.find(x=>x.id===editId):null;
+  document.getElementById('aEmpresa').value=a?.empresa||'';
+  document.getElementById('aContato').value=a?.contato||'';
+  document.getElementById('aObs').value=a?.observacao||'';
+  document.getElementById('aProxPasso').value=a?.proximo_passo||'';
+  document.getElementById('aProxData').value=a?.proximo_passo_data||'';
+  document.getElementById('aData').value=a?.data||today();
+  const aVend=document.getElementById('aVendedor');
+  aVend.innerHTML=vendedores.map(v=>`<option${v.nome===a?.vendedor?' selected':''}>${v.nome}</option>`).join('');
+  if(currentUser.role==='vendedor')aVend.value=currentUser.vendedorNome||aVend.value;
+  const aNeg=document.getElementById('aNegocio');
+  aNeg.innerHTML='<option value="">— Nenhum —</option>'+deals.map(d=>`<option value="${d.id}"${d.id===a?.negocio_ids?.[0]?' selected':''}>${d.company}</option>`).join('');
+  document.getElementById('atividadeOverlay').classList.add('open');
+}
+function closeAtividadeModal(){document.getElementById('atividadeOverlay').classList.remove('open')}
+
+async function saveAtividade(){
+  const payload={
+    empresa:document.getElementById('aEmpresa').value.trim(),
+    contato:document.getElementById('aContato').value.trim(),
+    vendedor:document.getElementById('aVendedor').value,
+    tipo:document.getElementById('aTipo').value,
+    data:document.getElementById('aData').value||null,
+    observacao:document.getElementById('aObs').value,
+    proximoPasso:document.getElementById('aProxPasso').value,
+    proximoPassoData:document.getElementById('aProxData').value||null,
+    negocioIds:document.getElementById('aNegocio').value?[parseInt(document.getElementById('aNegocio').value)]:[],
+  };
+  showLoad('Salvando...');
   try{
-    await fetch(API+'/deals/'+id,{method:'DELETE',headers:getHeaders()});
-    deals=deals.filter(d=>d.id!==id);
-    if(detailId===id)closeDetail();
-    renderBoard(); toast('Negocio excluido'); hideLoading();
-  }catch(e){ hideLoading(); toast('Erro ao excluir','err'); }
+    if(editAtividadeId){
+      await apiPut('atividades',editAtividadeId,payload);
+      const idx=atividades.findIndex(x=>x.id===editAtividadeId);if(idx>=0)atividades[idx]={...atividades[idx],...payload,proximo_passo:payload.proximoPasso,proximo_passo_data:payload.proximoPassoData};
+    }else{
+      const r=await fetch(API+'/atividades',{method:'POST',headers:getH(),body:JSON.stringify(payload)});
+      const na=await r.json();atividades.unshift(na);
+    }
+    closeAtividadeModal();renderAtividadesTable();toast(editAtividadeId?'Atividade atualizada':'Atividade criada');hideLoad();
+  }catch(e){hideLoad();toast('Erro ao salvar','err')}
 }
 
+async function deleteAtividade(id){
+  if(!confirm('Excluir esta atividade?'))return;
+  await fetch(API+'/atividades/'+id,{method:'DELETE',headers:getH()});
+  atividades=atividades.filter(a=>a.id!==id);renderAtividadesTable();toast('Atividade excluida');
+}
+
+// ══ EMPRESAS ══
+function renderEmpresas(){
+  const c=document.getElementById('mainContent');
+  // derive companies from deals
+  const empMap={};
+  deals.forEach(d=>{if(d.company){if(!empMap[d.company])empMap[d.company]={nome:d.company,deals:0,valor:0,contato:d.contact||'',email:d.email||''};empMap[d.company].deals++;empMap[d.company].valor+=parseFloat(d.value)||0;}});
+  const emps=Object.values(empMap).sort((a,b)=>b.valor-a.valor);
+  c.innerHTML=`
+    <div class="section-header">
+      <div class="search-wrap"><input class="search-input" id="empSearch" placeholder="Buscar empresa..." oninput="renderEmpresasTable()"></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden" id="empTableWrap">
+      <table><thead><tr><th>Empresa</th><th>Contato</th><th>Negocios</th><th>Valor total</th></tr></thead>
+      <tbody id="empBody"></tbody></table>
+    </div>
+  `;
+  window._emps=emps;
+  renderEmpresasTable();
+}
+
+function renderEmpresasTable(){
+  const q=(document.getElementById('empSearch')?.value||'').toLowerCase();
+  const filtered=(window._emps||[]).filter(e=>e.nome.toLowerCase().includes(q));
+  const tbody=document.getElementById('empBody');if(!tbody)return;
+  if(!filtered.length){tbody.innerHTML=`<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">🏢</div><p>Nenhuma empresa encontrada</p></div></td></tr>`;return}
+  tbody.innerHTML=filtered.map(e=>`
+    <tr>
+      <td><strong>${e.nome}</strong></td>
+      <td>${e.contato||'—'}</td>
+      <td><span class="badge badge-blue">${e.deals} negocio${e.deals!==1?'s':''}</span></td>
+      <td style="color:var(--accent);font-weight:600">${fmt(e.valor)}</td>
+    </tr>
+  `).join('');
+}
+
+// ══ VENDEDORES ══
+function renderVendedores(){
+  const c=document.getElementById('mainContent');
+  c.innerHTML=`
+    <div class="section-header">
+      <div class="search-wrap"><input class="search-input" id="vendSearch" placeholder="Buscar vendedor..." oninput="renderVendedoresTable()"></div>
+      ${currentUser.role==='diretor'?'<button class="btn btn-primary btn-sm" onclick="openVendedorModal()">+ Novo vendedor</button>':''}
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table><thead><tr><th>Nome</th><th>Cargo</th><th>E-mail</th><th>Regioes</th><th>Negocios</th><th>Pipeline</th>${currentUser.role==='diretor'?'<th></th>':''}</tr></thead>
+      <tbody id="vendBody"></tbody></table>
+    </div>
+  `;
+  renderVendedoresTable();
+}
+
+function renderVendedoresTable(){
+  const q=(document.getElementById('vendSearch')?.value||'').toLowerCase();
+  const filtered=vendedores.filter(v=>v.nome.toLowerCase().includes(q));
+  const tbody=document.getElementById('vendBody');if(!tbody)return;
+  if(!filtered.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum vendedor</p></div></td></tr>`;return}
+  tbody.innerHTML=filtered.map(v=>{
+    const vDeals=deals.filter(d=>d.resp===v.nome);
+    const vPipeline=vDeals.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
+    const bg=avatarColor(v.nome);
+    return`<tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="background:${bg}">${initials(v.nome)}</div><strong>${v.nome}</strong></div></td>
+      <td>${v.cargo||'—'}</td>
+      <td>${v.email||'—'}</td>
+      <td>${(v.regioes||[]).map(r=>`<span class="badge badge-amber" style="margin:1px">${r}</span>`).join('')||'—'}</td>
+      <td>${vDeals.length}</td>
+      <td style="color:var(--accent)">${fmt(vPipeline)}</td>
+      ${currentUser.role==='diretor'?`<td><div style="display:flex;gap:4px"><button class="btn-icon" onclick="openVendedorModal(${v.id})">✏</button><button class="btn-icon" onclick="deleteVendedor(${v.id})">🗑</button></div></td>`:''}
+    </tr>`;
+  }).join('');
+}
+
+function openVendedorModal(editId=null){
+  editVendedorId=editId;
+  document.getElementById('vendedorModalTitle').textContent=editId?'Editar vendedor':'Novo vendedor';
+  const v=editId?vendedores.find(x=>x.id===editId):null;
+  document.getElementById('vNome').value=v?.nome||'';
+  document.getElementById('vCargo').value=v?.cargo||'';
+  document.getElementById('vEmail').value=v?.email||'';
+  document.getElementById('vTelefone').value=v?.telefone||'';
+  const vReg=document.getElementById('vRegioes');
+  vReg.innerHTML=regioes.map(r=>`<label style="display:flex;align-items:center;gap:6px;font-size:.83rem;cursor:pointer"><input type="checkbox" value="${r}"${(v?.regioes||[]).includes(r)?' checked':''}> ${r}</label>`).join('');
+  document.getElementById('vendedorOverlay').classList.add('open');
+}
+function closeVendedorModal(){document.getElementById('vendedorOverlay').classList.remove('open')}
+
+async function saveVendedor(){
+  const nome=document.getElementById('vNome').value.trim();
+  if(!nome){toast('Informe o nome.','err');return}
+  const regs=[...document.querySelectorAll('#vRegioes input:checked')].map(i=>i.value);
+  const payload={nome,cargo:document.getElementById('vCargo').value,email:document.getElementById('vEmail').value,telefone:document.getElementById('vTelefone').value,regioes:regs,servicosMeta:{}};
+  showLoad('Salvando...');
+  try{
+    if(editVendedorId){await apiPut('vendedores',editVendedorId,payload);const idx=vendedores.findIndex(x=>x.id===editVendedorId);if(idx>=0)vendedores[idx]={...vendedores[idx],...payload}}
+    else{const r=await fetch(API+'/vendedores',{method:'POST',headers:getH(),body:JSON.stringify(payload)});const nv=await r.json();vendedores.push(nv)}
+    closeVendedorModal();renderVendedores();toast('Vendedor salvo');hideLoad();
+  }catch(e){hideLoad();toast('Erro ao salvar','err')}
+}
+
+async function deleteVendedor(id){
+  if(!confirm('Excluir este vendedor?'))return;
+  await fetch(API+'/vendedores/'+id,{method:'DELETE',headers:getH()});
+  vendedores=vendedores.filter(v=>v.id!==id);renderVendedores();toast('Vendedor excluido');
+}
+
+// ══ METAS ══
+function renderMetas(){
+  const c=document.getElementById('mainContent');
+  const quarters=[...new Set(metas.map(m=>m.quarter))].sort();
+  const currentQ=quarters[0]||'Q2 2026';
+
+  c.innerHTML=`
+    <div class="section-header">
+      <div class="flex gap12">
+        <select class="filter-sel" id="metaFilterQ" onchange="renderMetasContent()" style="font-size:.85rem">
+          ${['Q1 2026','Q2 2026','Q3 2026','Q4 2026','Q1 2027'].map(q=>`<option${q===currentQ?' selected':''}>${q}</option>`).join('')}
+        </select>
+        <select class="filter-sel" id="metaFilterV" onchange="renderMetasContent()"><option value="">Todos vendedores</option>${vendedores.map(v=>`<option>${v.nome}</option>`).join('')}</select>
+      </div>
+      ${currentUser.role==='diretor'?'<button class="btn btn-primary btn-sm" onclick="openMetaModal()">+ Definir meta</button>':''}
+    </div>
+    <div id="metasContent"></div>
+  `;
+  renderMetasContent();
+}
+
+function renderMetasContent(){
+  const q=document.getElementById('metaFilterQ')?.value;
+  const vf=document.getElementById('metaFilterV')?.value||'';
+  const div=document.getElementById('metasContent');if(!div)return;
+
+  const metasQ=metas.filter(m=>m.quarter===q);
+  let vends=vendedores.filter(v=>!vf||v.nome===vf);
+  if(currentUser.role==='vendedor')vends=vends.filter(v=>v.nome===currentUser.vendedorNome);
+
+  if(!vends.length){div.innerHTML=`<div class="empty-state"><div class="empty-icon">🎯</div><p>Nenhum vendedor encontrado</p></div>`;return}
+
+  div.innerHTML=vends.map(v=>{
+    const meta=metasQ.find(m=>m.vendedor_id===v.id);
+    const regioes_meta=meta?.regioes||{};
+    const vDeals=deals.filter(d=>d.resp===v.nome&&d.stage===4);
+
+    return`<div class="card mb16">
+      <div class="flex-between mb16">
+        <div class="flex gap12"><div class="avatar" style="background:${avatarColor(v.nome)};width:36px;height:36px;font-size:.8rem">${initials(v.nome)}</div><div><div style="font-weight:600">${v.nome}</div><div style="font-size:.75rem;color:var(--muted)">${v.cargo||'Vendedor'} ${(v.regioes||[]).map(r=>`<span class="badge badge-amber" style="margin:1px">${r}</span>`).join('')}</div></div></div>
+        ${currentUser.role==='diretor'?`<button class="btn btn-ghost btn-sm" onclick="openMetaModal(${v.id})">Editar meta</button>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+        ${SERVICOS.map(s=>{
+          const metaVal=parseFloat(regioes_meta[s]||0);
+          const realVal=vDeals.filter(d=>d.service===s).reduce((sum,d)=>sum+(parseFloat(d.value)||0),0);
+          const pct=metaVal>0?Math.min(100,Math.round(realVal/metaVal*100)):0;
+          const color=pct>=100?'var(--green)':pct>=70?'var(--accent)':'var(--blue)';
+          return`<div class="card-sm">
+            <div style="font-size:.78rem;font-weight:600;margin-bottom:6px">${s}</div>
+            <div style="font-size:.75rem;color:var(--muted)">Meta: <strong style="color:var(--text)">${fmt(metaVal)}</strong></div>
+            <div style="font-size:.75rem;color:var(--muted)">Realizado: <strong style="color:${color}">${fmt(realVal)}</strong></div>
+            <div class="meta-bar-wrap"><div class="meta-bar-bg"><div class="meta-bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="meta-pct">${pct}%</div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openMetaModal(vendId=null){
+  const sel=document.getElementById('mVendedor');
+  sel.innerHTML=vendedores.map(v=>`<option value="${v.id}"${v.id===vendId?' selected':''}>${v.nome}</option>`).join('');
+  const meta=vendId?metas.find(m=>m.vendedor_id===vendId):null;
+  const regs=meta?.regioes||{};
+  document.getElementById('metaServicos').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    ${SERVICOS.map(s=>`<div class="fg"><label>${s}</label><input type="number" id="ms_${s.replace(/[^a-z]/gi,'_')}" placeholder="0" value="${regs[s]||''}"></div>`).join('')}
+  </div>`;
+  document.getElementById('metaOverlay').classList.add('open');
+}
+function closeMetaModal(){document.getElementById('metaOverlay').classList.remove('open')}
+
+async function saveMeta(){
+  const vendedorId=parseInt(document.getElementById('mVendedor').value);
+  const quarter=document.getElementById('mQuarter').value;
+  const regioes={};
+  SERVICOS.forEach(s=>{const v=parseFloat(document.getElementById('ms_'+s.replace(/[^a-z]/gi,'_'))?.value)||0;if(v>0)regioes[s]=v;});
+  showLoad('Salvando...');
+  try{
+    const r=await fetch(API+'/metas',{method:'POST',headers:getH(),body:JSON.stringify({vendedorId,quarter,regioes})});
+    const nm=await r.json();
+    const idx=metas.findIndex(m=>m.vendedor_id===vendedorId&&m.quarter===quarter);
+    if(idx>=0)metas[idx]=nm;else metas.push(nm);
+    closeMetaModal();renderMetasContent();toast('Meta salva');hideLoad();
+  }catch(e){hideLoad();toast('Erro ao salvar','err')}
+}
+
+// ══ USUARIOS ══
+function renderUsuarios(){
+  if(currentUser.role!=='diretor'){document.getElementById('mainContent').innerHTML='<div class="empty-state"><div class="empty-icon">🔐</div><p>Acesso restrito</p></div>';return}
+  const c=document.getElementById('mainContent');
+  c.innerHTML=`
+    <div class="section-header">
+      <div class="section-title" style="font-size:.9rem;color:var(--muted)">Gerencie os acessos ao sistema</div>
+      <button class="btn btn-primary btn-sm" onclick="openUsuarioModal()">+ Novo usuario</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Regioes</th><th>Status</th><th></th></tr></thead>
+      <tbody id="usuBody"></tbody></table>
+    </div>
+  `;
+  renderUsuariosTable();
+}
+
+function renderUsuariosTable(){
+  const tbody=document.getElementById('usuBody');if(!tbody)return;
+  if(!usuarios.length){tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">👤</div><p>Nenhum usuario</p></div></td></tr>`;return}
+  const roleBadge={diretor:'badge-purple',gerente:'badge-amber',vendedor:'badge-blue'};
+  const roleLabel={diretor:'Diretor',gerente:'Gerente',vendedor:'Vendedor'};
+  tbody.innerHTML=usuarios.map(u=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="background:${avatarColor(u.nome)}">${initials(u.nome)}</div><strong>${u.nome}</strong>${u.id===currentUser.userId?'<span class="badge badge-green" style="font-size:.65rem">Voce</span>':''}</div></td>
+    <td>${u.email}</td>
+    <td><span class="badge ${roleBadge[u.role]||'badge-blue'}">${roleLabel[u.role]||u.role}</span></td>
+    <td>${(u.regioes||[]).map(r=>`<span class="badge badge-amber" style="margin:1px">${r}</span>`).join('')||'—'}</td>
+    <td><span class="badge ${u.ativo?'badge-green':'badge-red'}">${u.ativo?'Ativo':'Inativo'}</span></td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn-icon" onclick="openUsuarioModal(${u.id})">✏</button>
+      ${u.id!==currentUser.userId?`<button class="btn-icon" onclick="deleteUsuario(${u.id})">🗑</button>`:''}
+    </div></td>
+  </tr>`).join('');
+}
+
+function openUsuarioModal(editId=null){
+  editUsuarioId=editId;
+  document.getElementById('usuarioModalTitle').textContent=editId?'Editar usuario':'Novo usuario';
+  const u=editId?usuarios.find(x=>x.id===editId):null;
+  document.getElementById('uNome').value=u?.nome||'';
+  document.getElementById('uEmail').value=u?.email||'';
+  document.getElementById('uSenha').value='';
+  document.getElementById('uRole').value=u?.role||'vendedor';
+  document.getElementById('uAtivo').value=u?.ativo??1;
+  const uReg=document.getElementById('uRegioes');
+  uReg.innerHTML=regioes.map(r=>`<label style="display:flex;align-items:center;gap:6px;font-size:.83rem;cursor:pointer"><input type="checkbox" value="${r}"${(u?.regioes||[]).includes(r)?' checked':''}> ${r}</label>`).join('');
+  const uVend=document.getElementById('uVendedor');
+  uVend.innerHTML='<option value="">— Nenhum —</option>'+vendedores.map(v=>`<option value="${v.id}"${v.id===u?.vendedor_id?' selected':''}>${v.nome}</option>`).join('');
+  document.getElementById('usuarioOverlay').classList.add('open');
+}
+function closeUsuarioModal(){document.getElementById('usuarioOverlay').classList.remove('open')}
+
+async function saveUsuario(){
+  const nome=document.getElementById('uNome').value.trim();
+  const email=document.getElementById('uEmail').value.trim();
+  const senha=document.getElementById('uSenha').value;
+  if(!nome||!email){toast('Preencha nome e e-mail.','err');return}
+  if(!editUsuarioId&&!senha){toast('Informe uma senha.','err');return}
+  const regs=[...document.querySelectorAll('#uRegioes input:checked')].map(i=>i.value);
+  const payload={nome,email,senha,role:document.getElementById('uRole').value,regioes:regs,vendedor_id:parseInt(document.getElementById('uVendedor').value)||null,ativo:parseInt(document.getElementById('uAtivo').value)};
+  showLoad('Salvando...');
+  try{
+    if(editUsuarioId){await apiPut('usuarios',editUsuarioId,payload);const idx=usuarios.findIndex(x=>x.id===editUsuarioId);if(idx>=0)usuarios[idx]={...usuarios[idx],...payload}}
+    else{const r=await fetch(API+'/usuarios',{method:'POST',headers:getH(),body:JSON.stringify(payload)});const nu=await r.json();usuarios.push(nu)}
+    closeUsuarioModal();renderUsuariosTable();toast('Usuario salvo');hideLoad();
+  }catch(e){hideLoad();toast('Erro ao salvar: '+(e.message||''),'err')}
+}
+
+async function deleteUsuario(id){
+  if(!confirm('Excluir este usuario?'))return;
+  await fetch(API+'/usuarios/'+id,{method:'DELETE',headers:getH()});
+  usuarios=usuarios.filter(u=>u.id!==id);renderUsuariosTable();toast('Usuario excluido');
+}
+
+// ══ PERFIL ══
 function openPerfilModal(){
-  document.getElementById('userMenu').style.display='none';
   document.getElementById('pNome').value=currentUser?.nome||'';
   document.getElementById('pEmail').value=currentUser?.email||'';
   document.getElementById('pSenha').value='';
   document.getElementById('perfilErr').style.display='none';
   document.getElementById('perfilOverlay').classList.add('open');
 }
-function closePerfilModal(){ document.getElementById('perfilOverlay').classList.remove('open'); }
-
+function closePerfilModal(){document.getElementById('perfilOverlay').classList.remove('open')}
 async function savePerfil(){
   const nome=document.getElementById('pNome').value.trim();
   const email=document.getElementById('pEmail').value.trim();
   const senha=document.getElementById('pSenha').value;
   const err=document.getElementById('perfilErr');
-  if(!nome||!email){ err.style.display='block'; err.textContent='Preencha nome e e-mail.'; return; }
-  showLoading('Salvando...');
+  if(!nome||!email){err.style.display='block';err.textContent='Preencha nome e e-mail.';return}
+  showLoad('Salvando...');
   try{
-    const r=await fetch(API+'/auth/perfil',{method:'PUT',headers:getHeaders(),body:JSON.stringify({nome,email,senha})});
-    if(!r.ok)throw new Error('Erro ao salvar');
-    closePerfilModal(); toast('Perfil atualizado'); hideLoading();
-  }catch(e){ hideLoading(); err.style.display='block'; err.textContent=e.message; }
+    await fetch(API+'/auth/perfil',{method:'PUT',headers:getH(),body:JSON.stringify({nome,email,senha})});
+    closePerfilModal();toast('Perfil atualizado');hideLoad();
+  }catch(e){hideLoad();err.style.display='block';err.textContent='Erro ao salvar'}
 }
 
-function exportCSV(){
-  const h=['Empresa','Contato','Cargo','Email','Telefone','Servico','Valor','Etapa','Responsavel','Prioridade','Fonte','Proximo contato','Notas'];
-  const rows=deals.map(d=>[d.company,d.contact,d.role,d.email,d.phone,d.service,d.value,STAGES[d.stage]?.name,d.resp,d.prio,d.source,d.date,d.notes].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
-  const blob=new Blob([[h.join(','),...rows].join('\n')],{type:'text/csv'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='pipeline-crm.csv'; a.click();
+// ══ UTILS ══
+async function apiPut(resource,id,payload){
+  await fetch(API+'/'+resource+'/'+id,{method:'PUT',headers:getH(),body:JSON.stringify(payload)});
 }
 
 init();

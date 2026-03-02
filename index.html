@@ -306,13 +306,41 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+<!-- MODAL CONVIDAR NOVO USUÁRIO -->
+<div class="overlay" id="CM" onclick="if(event.target===this)closeCM()">
+  <div class="modal">
+    <div class="mh"><div class="mt2">Convidar usuário</div><button class="mc" onclick="closeCM()">✕</button></div>
+    <div class="mb">
+      <div class="err-box" id="CE"></div>
+      <div style="background:rgba(0,153,230,.08);border:1px solid rgba(0,153,230,.2);border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:.82rem;color:var(--mt);line-height:1.5">
+        📧 O usuário receberá um <strong style="color:var(--tx)">e-mail com um link</strong> para definir sua senha e ativar a conta. O link expira em <strong style="color:var(--tx)">48 horas</strong>.
+      </div>
+      <div class="r2">
+        <div class="fg"><label>Nome</label><input id="cNm" placeholder="Nome completo"></div>
+        <div class="fg"><label>E-mail *</label><input type="email" id="cEm" placeholder="email@empresa.com"></div>
+      </div>
+      <div class="fg"><label>Perfil</label>
+        <select id="cRl">
+          <option value="vendedor">Vendedor</option>
+          <option value="gerente">Gerente</option>
+          <option value="diretor">Diretor</option>
+        </select>
+      </div>
+      <div class="fg"><label>Regiões (gerentes)</label><div id="cRC" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px"></div></div>
+      <div class="fg"><label>Vincular a vendedor</label><select id="cVn"><option value="">— Nenhum —</option></select></div>
+    </div>
+    <div class="mf"><button class="btn btn-g" onclick="closeCM()">Cancelar</button><button class="btn btn-p" onclick="enviarConviteUser()">📧 Enviar convite</button></div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR USUÁRIO EXISTENTE -->
 <div class="overlay" id="UM" onclick="if(event.target===this)closeUM()">
   <div class="modal">
-    <div class="mh"><div class="mt2" id="UMT">Novo usuário</div><button class="mc" onclick="closeUM()">✕</button></div>
+    <div class="mh"><div class="mt2" id="UMT">Editar usuário</div><button class="mc" onclick="closeUM()">✕</button></div>
     <div class="mb">
       <div class="err-box" id="UE"></div>
       <div class="r2"><div class="fg"><label>Nome *</label><input id="uNm"></div><div class="fg"><label>E-mail *</label><input type="email" id="uEm"></div></div>
-      <div class="r2"><div class="fg"><label>Senha</label><input type="password" id="uSn" placeholder="Vazio = não altera"></div>
+      <div class="r2"><div class="fg"><label>Nova senha</label><input type="password" id="uSn" placeholder="Vazio = não altera"></div>
         <div class="fg"><label>Perfil</label><select id="uRl"><option value="vendedor">Vendedor</option><option value="gerente">Gerente</option><option value="diretor">Diretor</option></select></div></div>
       <div class="fg"><label>Regiões (gerentes)</label><div id="uRC" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px"></div></div>
       <div class="r2"><div class="fg"><label>Vincular a vendedor</label><select id="uVn"><option value="">— Nenhum —</option></select></div>
@@ -450,7 +478,7 @@ function renderPage(pg){
   else if(pg==='empresas')renderEmpresas(mc,tr);
   else if(pg==='metas')renderMetas(mc,tr);
   else if(pg==='vendedores')renderVends(mc,tr);
-  else if(pg==='usuarios')renderUsers(mc,tr);
+  else if(pg==='usuarios')renderUsers(mc,tr).catch(e=>console.error(e));
 }
 
 function fillSelects(){
@@ -1127,13 +1155,21 @@ async function delVend(id){
 }
 
 // ─── USUÁRIOS ───
-function renderUsers(mc,tr){
-  const b=document.createElement('button');b.className='btn btn-p';b.textContent='+ Novo usuário';b.onclick=()=>openUM();tr.appendChild(b);
+let convites=[];
+
+async function renderUsers(mc,tr){
+  const b=document.createElement('button');b.className='btn btn-p';b.textContent='+ Convidar usuário';b.onclick=()=>openCM();tr.appendChild(b);
+
+  // Carregar convites pendentes
+  try{const r=await ap('/usuarios/convites','GET');convites=r||[];}catch{convites=[];}
+
+  const rm={diretor:'bd-dir',gerente:'bd-ger',vendedor:'bd-ven'};
+  const rl={diretor:'Diretor',gerente:'Gerente',vendedor:'Vendedor'};
+
   let h='<div class="card-box"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Regiões</th><th>Status</th><th></th></tr></thead><tbody>';
-  if(!users.length)h+='<tr><td colspan="6" style="text-align:center;color:var(--mt);padding:22px">Nenhum usuário.</td></tr>';
+  if(!users.length&&!convites.filter(c=>!c.usado).length)h+='<tr><td colspan="6" style="text-align:center;color:var(--mt);padding:22px">Nenhum usuário.</td></tr>';
+
   users.forEach(u=>{
-    const rm={diretor:'bd-dir',gerente:'bd-ger',vendedor:'bd-ven'};
-    const rl={diretor:'Diretor',gerente:'Gerente',vendedor:'Vendedor'};
     h+=`<tr><td><div style="display:flex;align-items:center;gap:7px"><div class="av" style="background:${ac(u.nome)}">${ini(u.nome)}</div>${u.nome}</div></td>
       <td style="color:var(--mt)">${u.email}</td>
       <td><span class="badge ${rm[u.role]||''}">${rl[u.role]||u.role}</span></td>
@@ -1142,25 +1178,83 @@ function renderUsers(mc,tr){
       <td style="text-align:right">${u.id!==CU.userId?`<button class="btn btn-g btn-xs" onclick="openUM(${u.id})" style="margin-right:3px">✏</button><button class="btn btn-d btn-xs" onclick="delUser(${u.id})">🗑</button>`:'<span style="font-size:.7rem;color:var(--mt)">você</span>'}</td>
     </tr>`;
   });
+
+  // Convites pendentes (não usados e não expirados)
+  convites.filter(c=>!c.usado&&new Date(c.expira_em)>new Date()).forEach(c=>{
+    const roleLabel={diretor:'Diretor',gerente:'Gerente',vendedor:'Vendedor'}[c.role]||c.role;
+    const roleClass={diretor:'bd-dir',gerente:'bd-ger',vendedor:'bd-ven'}[c.role]||'';
+    h+=`<tr style="opacity:.7"><td><div style="display:flex;align-items:center;gap:7px">
+      <div class="av" style="background:#1a2a4a;color:var(--mt);font-size:.7rem">?</div>
+      <span style="color:var(--mt);font-style:italic">${c.nome||'Aguardando'}</span>
+    </div></td>
+      <td style="color:var(--mt)">${c.email}</td>
+      <td><span class="badge ${roleClass}">${roleLabel}</span></td>
+      <td>—</td>
+      <td><span class="badge" style="color:#f59e0b;border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)">⏳ Convite enviado</span></td>
+      <td style="text-align:right">
+        <button class="btn btn-g btn-xs" onclick="reenviarConvite(${c.id},'${c.email}','${c.nome||''}','${c.role}')" style="margin-right:3px" title="Reenviar">↺</button>
+        <button class="btn btn-d btn-xs" onclick="revogarConvite(${c.id})" title="Revogar">🗑</button>
+      </td>
+    </tr>`;
+  });
+
   h+='</tbody></table></div>';mc.innerHTML=h;
 }
 
-function openUM(id=null){
-  eUser=id;document.getElementById('UMT').textContent=id?'Editar usuário':'Novo usuário';
+// ─── MODAL CONVIDAR ───
+function openCM(){
+  document.getElementById('CE').style.display='none';
+  buildCBs('cRC');
+  const cv=document.getElementById('cVn');
+  if(cv)cv.innerHTML='<option value="">— Nenhum —</option>'+vends.map(v=>`<option value="${v.id}">${v.nome}</option>`).join('');
+  ['cNm','cEm'].forEach(x=>sv(x,''));sv('cRl','vendedor');
+  document.querySelectorAll('#cRC input[type=checkbox]').forEach(cb=>cb.checked=false);
+  document.getElementById('CM').classList.add('open');
+}
+function closeCM(){document.getElementById('CM').classList.remove('open');}
+
+async function enviarConviteUser(){
+  const nm=gv('cNm').trim(),em=gv('cEm').trim();
+  const er=document.getElementById('CE');
+  er.style.display='none';
+  if(!em){er.style.display='block';er.textContent='E-mail é obrigatório.';return;}
+  const rg=[...document.querySelectorAll('#cRC input:checked')].map(c=>c.value);
+  const pl={nome:nm,email:em,role:gv('cRl'),regioes:rg,vendedor_id:gv('cVn')||null};
+  SL('Enviando convite...');
+  try{
+    await ap('/usuarios/convidar','POST',pl);
+    closeCM();renderPage('usuarios');toast('Convite enviado para '+em);HL();
+  }catch(ex){HL();er.style.display='block';er.textContent=ex.message||'Erro ao enviar convite.';}
+}
+
+async function reenviarConvite(id,email,nome,role){
+  if(!confirm(`Reenviar convite para ${email}?`))return;
+  SL('Reenviando...');
+  try{
+    await ap('/usuarios/convites/'+id,'DELETE');
+    await ap('/usuarios/convidar','POST',{nome,email,role});
+    renderPage('usuarios');toast('Convite reenviado!');HL();
+  }catch{HL();toast('Erro ao reenviar','err');}
+}
+
+async function revogarConvite(id){
+  if(!confirm('Revogar convite?'))return;SL('Revogando...');
+  try{await ap('/usuarios/convites/'+id,'DELETE');renderPage('usuarios');toast('Convite revogado');HL();}
+  catch{HL();toast('Erro','err');}
+}
+
+// ─── MODAL EDITAR USUÁRIO ───
+function openUM(id){
+  if(!id)return;
+  eUser=id;
+  document.getElementById('UMT').textContent='Editar usuário';
   document.getElementById('UE').style.display='none';
   buildCBs('uRC');
   const uv=document.getElementById('uVn');
   if(uv)uv.innerHTML='<option value="">— Nenhum —</option>'+vends.map(v=>`<option value="${v.id}">${v.nome}</option>`).join('');
-  if(id){
-    const u=users.find(x=>x.id===id);if(!u)return;
-    sv('uNm',u.nome);sv('uEm',u.email);sv('uSn','');sv('uRl',u.role);sv('uAt',u.ativo?'1':'0');sv('uVn',u.vendedor_id||'');
-    document.querySelectorAll('#uRC input[type=checkbox]').forEach(cb=>{cb.checked=(u.regioes||[]).includes(cb.value);});
-    document.getElementById('uSn').placeholder='Vazio = não altera';
-  }else{
-    ['uNm','uEm','uSn'].forEach(x=>sv(x,''));sv('uRl','vendedor');sv('uAt','1');sv('uVn','');
-    document.getElementById('uSn').placeholder='Senha obrigatória';
-    document.querySelectorAll('#uRC input[type=checkbox]').forEach(cb=>cb.checked=false);
-  }
+  const u=users.find(x=>x.id===id);if(!u)return;
+  sv('uNm',u.nome);sv('uEm',u.email);sv('uSn','');sv('uRl',u.role);sv('uAt',u.ativo?'1':'0');sv('uVn',u.vendedor_id||'');
+  document.querySelectorAll('#uRC input[type=checkbox]').forEach(cb=>{cb.checked=(u.regioes||[]).includes(cb.value);});
   document.getElementById('UM').classList.add('open');
 }
 function closeUM(){document.getElementById('UM').classList.remove('open');}
@@ -1169,13 +1263,12 @@ async function saveUser(){
   const nm=gv('uNm').trim(),em=gv('uEm').trim(),sn=gv('uSn');
   const er=document.getElementById('UE');
   if(!nm||!em){er.style.display='block';er.textContent='Preencha nome e e-mail.';return;}
-  if(!eUser&&!sn){er.style.display='block';er.textContent='Informe a senha.';return;}
   const rg=[...document.querySelectorAll('#uRC input:checked')].map(c=>c.value);
   const pl={nome:nm,email:em,senha:sn,role:gv('uRl'),regioes:rg,vendedor_id:gv('uVn')||null,ativo:parseInt(gv('uAt'))};
   SL('Salvando...');
   try{
-    if(eUser){await ap('/usuarios/'+eUser,'PUT',pl);const i=users.findIndex(x=>x.id===eUser);if(i>=0)users[i]={...users[i],...pl,regioes:rg};}
-    else{const r=await ap('/usuarios','POST',pl);users.push(r);}
+    await ap('/usuarios/'+eUser,'PUT',pl);
+    const i=users.findIndex(x=>x.id===eUser);if(i>=0)users[i]={...users[i],...pl,regioes:rg};
     closeUM();renderPage('usuarios');toast('Usuário salvo');HL();
   }catch(ex){HL();er.style.display='block';er.textContent=ex.message||'Erro ao salvar';}
 }

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ativar Conta — ZeusTax CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0f1e;--sf:#0d1529;--sf2:#111d35;--bd:#1a2a4a;--tx:#e8eaf0;--mt:#6b7280;--ac:#0099e6;--gn:#22c55e;--rd:#ef4444}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .box{background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:40px;width:440px;max-width:100%}
+  .logo{display:flex;align-items:center;gap:2px;margin-bottom:28px}
+  .logo span:first-child{font-weight:700;color:#fff;font-size:1.4rem}
+  .logo span:last-child{font-weight:700;color:var(--ac);font-size:1.4rem}
+  h1{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:6px}
+  .sub{font-size:.85rem;color:var(--mt);margin-bottom:28px}
+  .fg{margin-bottom:14px}
+  .fg label{display:block;font-size:.7rem;font-weight:600;color:var(--mt);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+  .fg input{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 13px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .15s}
+  .fg input:focus{border-color:var(--ac)}
+  .fg input:disabled{opacity:.5;cursor:not-allowed}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:500;border:1px solid;margin-bottom:20px}
+  .badge-info{color:var(--ac);border-color:rgba(0,153,230,.3);background:rgba(0,153,230,.1)}
+  .btn{width:100%;padding:11px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;transition:all .15s;margin-top:6px}
+  .btn-p{background:var(--ac);color:#fff}
+  .btn-p:hover:not(:disabled){background:#0088cc;transform:translateY(-1px)}
+  .btn-p:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .err{color:var(--rd);font-size:.82rem;margin-bottom:14px;padding:9px 13px;background:rgba(239,68,68,.1);border-radius:8px;border:1px solid rgba(239,68,68,.3);display:none}
+  .success{text-align:center;display:none}
+  .success .icon{font-size:3rem;margin-bottom:16px}
+  .success h2{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:8px}
+  .success p{color:var(--mt);font-size:.88rem;line-height:1.6;margin-bottom:22px}
+  .success .btn-p{display:inline-block;padding:11px 28px;text-decoration:none;border-radius:9px;background:var(--ac);color:#fff;font-weight:600;font-size:.9rem}
+  .loading{text-align:center;padding:30px 0}
+  .sp{width:34px;height:34px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .expired{text-align:center;padding:10px 0}
+  .expired .icon{font-size:2.5rem;margin-bottom:14px}
+  .expired p{color:var(--mt);font-size:.88rem;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <div class="logo"><span>zeus</span><span>TAX</span></div>
+
+  <!-- Estado: carregando -->
+  <div id="stLoading" class="loading">
+    <div class="sp"></div>
+    <p style="color:var(--mt);font-size:.85rem">Verificando convite...</p>
+  </div>
+
+  <!-- Estado: expirado/inválido -->
+  <div id="stExpired" style="display:none" class="expired">
+    <div class="icon">⛔</div>
+    <h1 style="margin-bottom:8px">Convite inválido</h1>
+    <p id="expiredMsg">Este link expirou ou já foi utilizado.<br>Solicite um novo convite ao administrador.</p>
+  </div>
+
+  <!-- Estado: formulário de ativação -->
+  <div id="stForm" style="display:none">
+    <h1>Ativar sua conta</h1>
+    <p class="sub">Preencha os dados abaixo para acessar o CRM ZeusTax</p>
+    <div class="badge badge-info">
+      <span>👤</span>
+      <span id="badgeRole">Vendedor</span>
+      <span style="color:var(--mt)">·</span>
+      <span id="badgeEmail" style="color:var(--mt)"></span>
+    </div>
+    <div class="err" id="errMsg"></div>
+    <div class="fg">
+      <label>E-mail</label>
+      <input type="email" id="fEmail" disabled>
+    </div>
+    <div class="fg">
+      <label>Seu nome completo *</label>
+      <input type="text" id="fNome" placeholder="Como você prefere ser chamado" autocomplete="name">
+    </div>
+    <div class="fg">
+      <label>Crie sua senha *</label>
+      <input type="password" id="fSenha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+    </div>
+    <div class="fg">
+      <label>Confirmar senha *</label>
+      <input type="password" id="fSenha2" placeholder="Repita a senha" autocomplete="new-password">
+    </div>
+    <button class="btn btn-p" id="btnAtivar" onclick="ativar()">Ativar minha conta</button>
+  </div>
+
+  <!-- Estado: sucesso -->
+  <div id="stSuccess" class="success">
+    <div class="icon">✅</div>
+    <h2>Conta ativada!</h2>
+    <p>Sua conta foi criada com sucesso.<br>Você já pode acessar o CRM ZeusTax.</p>
+    <a href="/" class="btn-p" onclick="irParaLogin()">Entrar no CRM →</a>
+  </div>
+</div>
+
+<script>
+const API = 'https://api.crm.zeustax.com.br';
+let tokenConvite = null;
+
+function show(id) {
+  ['stLoading','stExpired','stForm','stSuccess'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? '' : 'none';
+  });
+}
+
+function setErr(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+async function init() {
+  const params = new URLSearchParams(location.search);
+  tokenConvite = params.get('token');
+
+  if (!tokenConvite) {
+    document.getElementById('expiredMsg').textContent = 'Link de convite inválido. Solicite um novo ao administrador.';
+    show('stExpired');
+    return;
+  }
+
+  try {
+    const r = await fetch(`${API}/convite/${tokenConvite}`);
+    const d = await r.json();
+
+    if (!r.ok) {
+      document.getElementById('expiredMsg').textContent = d.error || 'Convite inválido ou expirado.';
+      show('stExpired');
+      return;
+    }
+
+    // Preencher formulário com dados do convite
+    document.getElementById('fEmail').value = d.email;
+    document.getElementById('fNome').value = d.nome || '';
+    document.getElementById('badgeEmail').textContent = d.email;
+
+    const roles = { vendedor: 'Vendedor', gerente: 'Gerente', diretor: 'Diretor' };
+    document.getElementById('badgeRole').textContent = roles[d.role] || d.role;
+
+    show('stForm');
+    document.getElementById('fNome').focus();
+  } catch {
+    document.getElementById('expiredMsg').textContent = 'Erro ao conectar ao servidor. Tente novamente.';
+    show('stExpired');
+  }
+}
+
+async function ativar() {
+  const nome   = document.getElementById('fNome').value.trim();
+  const senha  = document.getElementById('fSenha').value;
+  const senha2 = document.getElementById('fSenha2').value;
+
+  setErr('');
+
+  if (!nome) return setErr('Informe seu nome completo.');
+  if (!senha || senha.length < 6) return setErr('A senha deve ter pelo menos 6 caracteres.');
+  if (senha !== senha2) return setErr('As senhas não conferem.');
+
+  const btn = document.getElementById('btnAtivar');
+  btn.disabled = true;
+  btn.textContent = 'Ativando...';
+
+  try {
+    const r = await fetch(`${API}/convite/${tokenConvite}/ativar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, senha }),
+    });
+
+    const d = await r.json();
+
+    if (!r.ok) {
+      setErr(d.error || 'Erro ao ativar conta.');
+      btn.disabled = false;
+      btn.textContent = 'Ativar minha conta';
+      return;
+    }
+
+    // Salvar token JWT e redirecionar
+    if (d.token) localStorage.setItem('crm_tk', d.token);
+    show('stSuccess');
+  } catch {
+    setErr('Erro de conexão. Tente novamente.');
+    btn.disabled = false;
+    btn.textContent = 'Ativar minha conta';
+  }
+}
+
+function irParaLogin() {
+  window.location.href = '/';
+}
+
+// Permitir Enter para submeter
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('stForm').style.display !== 'none') ativar();
+});
+
+init();
+</script>
+</body>
+</html>

@@ -958,6 +958,16 @@ function editDetail(){if(detId)openDM(null,detId);}
 async function saveNote(){if(!detId)return;const d=deals.find(x=>x.id===detId);if(d){d.notes=gv('dpNo');await ap('/deals/'+d.id,'PUT',d);}}
 
 // ─── ATIVIDADES ───
+function fmtDt(dt){
+  if(!dt||dt===''||dt==='null'||dt==='undefined') return '';
+  try{
+    // Se já vier com T (ISO do banco), usar direto; senão adicionar T12:00:00
+    const d = dt.includes('T') ? new Date(dt) : new Date(dt+'T12:00:00');
+    if(isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('pt-BR');
+  }catch{return '';}
+}
+
 function renderAtvs(mc,tr){
   const b=document.createElement('button');b.className='btn btn-p';b.textContent='+ Nova atividade';b.onclick=()=>openAM();tr.appendChild(b);
   const items=atvs.slice().sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
@@ -965,14 +975,14 @@ function renderAtvs(mc,tr){
   mc.innerHTML=items.map(a=>{
     const ic=TICONS[a.tipo]||'📝';
     const tc='t-'+(a.tipo||'outro').toLowerCase().replace(/[^a-z]/g,'').slice(0,3);
-    const dt=(a.data&&a.data!=='')?new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR'):'';
+    const dt=fmtDt(a.data);
     return`<div class="atv-i">
       <div class="atv-t ${tc}">${ic}</div>
       <div style="flex:1">
         <div style="font-size:.86rem;font-weight:600;margin-bottom:2px">${a.empresa||'—'} · ${a.contato||'—'}</div>
         <div style="font-size:.76rem;color:var(--mt)">${a.tipo}${dt?" · "+dt:""} · ${a.vendedor||'—'}</div>
         ${a.observacao?`<div style="font-size:.76rem;color:var(--mt);margin-top:4px">${a.observacao}</div>`:''}
-        ${a.proximo_passo?`<div style="font-size:.73rem;color:var(--ac);margin-top:5px">→ ${a.proximo_passo}${(a.proximo_passo_data&&a.proximo_passo_data!=='Invalid Date'&&a.proximo_passo_data!=='')?(' ('+new Date(a.proximo_passo_data+'T12:00:00').toLocaleDateString('pt-BR')+')')  :''}</div>`:''}
+        ${a.proximo_passo?`<div style="font-size:.73rem;color:var(--ac);margin-top:5px">→ ${a.proximo_passo}${fmtDt(a.proximo_passo_data)?'  ('+fmtDt(a.proximo_passo_data)+')':''}</div>`:''}
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0">
         <button class="ib" onclick="openAM(${a.id})">✏</button>
@@ -984,7 +994,9 @@ function renderAtvs(mc,tr){
 
 function openAM(id=null){
   eAtv=id;document.getElementById('AMT').textContent=id?'Editar atividade':'Nova atividade';
-  if(id){const a=atvs.find(x=>x.id===id);if(!a)return;sv('aEm',a.empresa||'');sv('aCt',a.contato||'');sv('aVn',a.vendedor||'');sv('aTp',a.tipo||'Reunião');sv('aDt',a.data||'');sv('aNg',a.negocio||'');sv('aOb',a.observacao||'');sv('aPx',a.proximo_passo||'');sv('aPd',a.proximo_passo_data||'');sv('aPo',a.proximo_passo_obs||'');}
+  if(id){const a=atvs.find(x=>x.id===id);if(!a)return;
+    const toInput=dt=>{if(!dt)return'';try{return(dt.includes('T')?new Date(dt):new Date(dt+'T12:00:00')).toISOString().slice(0,10);}catch{return'';}};
+    sv('aEm',a.empresa||'');sv('aCt',a.contato||'');sv('aVn',a.vendedor||'');sv('aTp',a.tipo||'Reunião');sv('aDt',toInput(a.data));sv('aNg',a.negocio||'');sv('aOb',a.observacao||'');sv('aPx',a.proximo_passo||'');sv('aPd',toInput(a.proximo_passo_data));sv('aPo',a.proximo_passo_obs||'');}
   else{['aEm','aCt','aNg','aOb','aPx','aPd','aPo'].forEach(x=>sv(x,''));sv('aDt',tod());if(CU.role==='vendedor')sv('aVn',CU.vendedorNome||'');}
   document.getElementById('AM').classList.add('open');
 }
@@ -994,7 +1006,7 @@ async function saveAtv(){
   const pl={empresa:gv('aEm'),contato:gv('aCt'),vendedor:gv('aVn'),tipo:gv('aTp'),data:gv('aDt')||null,negocio:gv('aNg'),observacao:gv('aOb'),proximoPasso:gv('aPx'),proximoPassoData:gv('aPd')||null,proximoPassoObs:gv('aPo')};
   SL('Salvando...');
   try{
-    if(eAtv){await ap('/atividades/'+eAtv,'PUT',pl);const i=atvs.findIndex(x=>x.id===eAtv);if(i>=0)atvs[i]={...atvs[i],...pl,proximo_passo:pl.proximoPasso,proximo_passo_data:pl.proximoPassoData,proximo_passo_obs:pl.proximoPassoObs};}
+    if(eAtv){await ap('/atividades/'+eAtv,'PUT',pl);const i=atvs.findIndex(x=>x.id===eAtv);if(i>=0)atvs[i]={...atvs[i],empresa:pl.empresa,contato:pl.contato,vendedor:pl.vendedor,tipo:pl.tipo,data:pl.data,negocio:pl.negocio,observacao:pl.observacao,proximo_passo:pl.proximoPasso,proximo_passo_data:pl.proximoPassoData,proximo_passo_obs:pl.proximoPassoObs};}
     else{const r=await ap('/atividades','POST',pl);atvs.unshift(r);}
     closeAM();renderPage('atividades');toast('Atividade salva');HL();
   }catch{HL();toast('Erro ao salvar','err');}

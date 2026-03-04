@@ -406,7 +406,7 @@ const pTk=()=>{
 const SL=t=>{document.getElementById('LT').textContent=t||'Carregando...';document.getElementById('LO').classList.add('show');};
 const HL=()=>document.getElementById('LO').classList.remove('show');
 const toast=(m,tp='ok')=>{const e=document.getElementById('TT');e.textContent=m;e.className='toast show '+tp;setTimeout(()=>e.classList.remove('show'),3000);};
-const ac=n=>{const c=['#4b9560','#7fb98a','#174c36','#b6cfae','#939fa4','#2d7a4f','#3d9960','#1a5c3a'];let h=0;for(let x of(n||'?'))h=((h<<5)-h)+x.charCodeAt(0);return c[Math.abs(h)%c.length];};
+const ac=n=>{const c=['#4b9560','#939fa4','#7fb98a','#6b7f72','#b6cfae','#174c36','#3d9960','#8a9fa6'];let h=0;for(let x of(n||'?'))h=((h<<5)-h)+x.charCodeAt(0);return c[Math.abs(h)%c.length];};
 const ini=n=>(n||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
 const gv=id=>{const e=document.getElementById(id);return e?e.value:'';};
 const sv=(id,v)=>{const e=document.getElementById(id);if(!e)return;if(e.tagName==='SELECT'){for(let o of e.options)if(String(o.value)===String(v)){o.selected=true;break;}}else e.value=v;};
@@ -620,9 +620,9 @@ function renderDashboard(mc,tr){
   const lostCount=deals.filter(d=>d.stage===5).length;
   const conv=deals.length>0?Math.round(wonCount/deals.length*100):0;
   const tkMedio=wonCount>0?Math.round(won/wonCount):0;
-  const STAGES=[{n:'Prospeccao',c:'var(--ac)'},{n:'Qualificacao',c:'var(--ac)'},{n:'Proposta enviada',c:'var(--pu)'},{n:'Negociacao',c:'var(--gn)'},{n:'Fechado Ganho',c:'#10b981'},{n:'Perdido',c:'#ef4444'}];
+  const STAGES=[{n:'Prospecção',c:'#939fa4'},{n:'Qualificação',c:'#4b9560'},{n:'Proposta enviada',c:'#7fb98a'},{n:'Negociação',c:'#174c36'},{n:'Fechado Ganho',c:'#b6cfae'},{n:'Perdido',c:'#ef4444'}];
   const SERVICOS=['Setup','Sustentacao','Desenvolvimento/IA','Acronis Backup','Acronis Seguranca','Renovacao'];
-  const colors=['var(--ac)','var(--ac)','var(--pu)','var(--gn)','#ef4444','#14b8a6'];
+  const colors=['#4b9560','#939fa4','#7fb98a','#174c36','#b6cfae','#6b7f72'];
 
   // Funil por etapa
   const funilData=STAGES.map((s,i)=>({name:s.n,color:s.c,val:deals.filter(d=>d.stage===i).reduce((sum,d)=>sum+getVal(d),0)}));
@@ -686,7 +686,7 @@ function renderDashboard(mc,tr){
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px">
         <div style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px">Evolucao Mensal</div>
-        ${mensalData.length?barRows(mensalData.map(([k,v])=>{const[y,m]=k.split('-');return{label:mNames[parseInt(m)-1]+'/'+y.slice(2),val:v}}),maxMensal,()=>'var(--accent)',d=>d.label,d=>d.val):'<div style="color:var(--muted);text-align:center;padding:20px">Cadastre negócios para ver evolução</div>'}
+        ${mensalData.length?barRows(mensalData.map(([k,v],mi)=>{const[y,m]=k.split('-');return{label:mNames[parseInt(m)-1]+'/'+y.slice(2),val:v,mi}}),maxMensal,(d)=>['#4b9560','#939fa4','#7fb98a','#6b7f72','#b6cfae','#174c36'][d.mi%6],d=>d.label,d=>d.val):'<div style="color:var(--muted);text-align:center;padding:20px">Cadastre negócios para ver evolução</div>'}
       </div>
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
@@ -703,7 +703,7 @@ function renderDashboard(mc,tr){
       const totalMeta=Object.values(ro).reduce((s,x)=>s+(parseFloat(x)||0),0);
       const totalReal=deals.filter(d=>d.stage===4&&d.resp===v.nome).reduce((s,d)=>s+getDealVal(d),0);
       const pct=totalMeta>0?Math.min(100,Math.round(totalReal/totalMeta*100)):0;
-      const cor=pct>=100?'var(--gr)':pct>=70?'var(--ac)':'var(--ac)';
+      const cor=pct>=100?'#b6cfae':pct>=70?'#4b9560':pct>=40?'#939fa4':'#6b7f72';
       const bg=ac(v.nome);
       return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
         '<div style="width:8px;height:8px;border-radius:50%;background:'+bg+';flex-shrink:0"></div>'+

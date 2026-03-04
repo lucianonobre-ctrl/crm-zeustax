@@ -225,7 +225,7 @@ tr:hover td{background:rgba(75,149,96,.04)}
   <div class="modal">
     <div class="mh"><div class="mt2" id="DMT">Novo negócio</div><button class="mc" onclick="closeDM()">✕</button></div>
     <div class="mb">
-      <div class="r2"><div class="fg"><label>Empresa *</label><input id="dCo" placeholder="Nome da empresa"></div><div class="fg"><label>Contato</label><input id="dCt" placeholder="Nome do contato"></div></div>
+      <div class="r2"><div class="fg"><label>Empresa *</label><div style="position:relative"><input id="dCo" placeholder="Nome da empresa" autocomplete="off" oninput="acEmp(this,'dCoList')" onfocus="acEmp(this,'dCoList')"><div id="dCoList" class="ac-list" style="display:none"></div></div></div><div class="fg"><label>Contato</label><input id="dCt" placeholder="Nome do contato"></div></div>
       <div class="r2"><div class="fg"><label>Cargo</label><input id="dRo" placeholder="Ex: Diretor"></div><div class="fg"><label>E-mail</label><input type="email" id="dEm"></div></div>
       <div class="r2"><div class="fg"><label>Telefone</label><input id="dPh" placeholder="(00) 00000-0000"></div><div class="fg"></div></div>
       <div class="fg">
@@ -273,7 +273,7 @@ tr:hover td{background:rgba(75,149,96,.04)}
   <div class="modal modal-lg">
     <div class="mh"><div class="mt2" id="AMT">Nova atividade</div><button class="mc" onclick="closeAM()">✕</button></div>
     <div class="mb">
-      <div class="r2"><div class="fg"><label>Empresa</label><input id="aEm" placeholder="Nome da empresa"></div><div class="fg"><label>Contato</label><input id="aCt" placeholder="Nome do contato"></div></div>
+      <div class="r2"><div class="fg"><label>Empresa</label><div style="position:relative"><input id="aEm" placeholder="Nome da empresa" autocomplete="off" oninput="acEmp(this,'aEmList')" onfocus="acEmp(this,'aEmList')"><div id="aEmList" class="ac-list" style="display:none"></div></div></div><div class="fg"><label>Contato</label><input id="aCt" placeholder="Nome do contato"></div></div>
       <div class="r2"><div class="fg"><label>Vendedor</label><select id="aVn"></select></div><div class="fg"><label>Tipo</label><select id="aTp"><option>Reunião</option><option>Ligação</option><option>E-mail</option><option>Visita</option><option>Outro</option></select></div></div>
       <div class="r2"><div class="fg"><label>Data</label><input type="date" id="aDt"></div><div class="fg"><label>Negócio relacionado</label><input id="aNg" placeholder="Nome do negócio"></div></div>
       <div class="fg"><label>Observação</label><textarea id="aOb" placeholder="O que foi discutido..."></textarea></div>
@@ -386,7 +386,18 @@ const tod=()=>new Date().toISOString().slice(0,10);
 const over=d=>d&&d<tod();
 const tk=()=>localStorage.getItem('crm_tk');
 const hd=()=>({'Content-Type':'application/json','Authorization':'Bearer '+tk()});
-const pTk=()=>{try{const t=tk();if(!t)return null;return JSON.parse(atob(t.split('.')[1]));}catch{return null;}};
+const pTk=()=>{
+  try{
+    const t=tk();if(!t)return null;
+    const payload=JSON.parse(atob(t.split('.')[1]));
+    // Verificar expiração
+    if(payload.exp && Date.now()/1000 > payload.exp){
+      localStorage.removeItem('crm_tk');
+      return null;
+    }
+    return payload;
+  }catch{return null;}
+};
 const SL=t=>{document.getElementById('LT').textContent=t||'Carregando...';document.getElementById('LO').classList.add('show');};
 const HL=()=>document.getElementById('LO').classList.remove('show');
 const toast=(m,tp='ok')=>{const e=document.getElementById('TT');e.textContent=m;e.className='toast show '+tp;setTimeout(()=>e.classList.remove('show'),3000);};
@@ -401,7 +412,7 @@ async function init(){
     const r=await fetch(API+'/auth/check-setup');
     const d=await r.json();
     if(!d.configured){document.getElementById('LB').style.display='none';document.getElementById('SB').style.display='block';HL();return;}
-    if(tk())await loadApp();else HL();
+    if(tk()&&pTk())await loadApp();else{localStorage.removeItem('crm_tk');HL();}
   }catch{HL();toast('Erro ao conectar à API','err');}
 }
 
@@ -432,7 +443,20 @@ async function login(){
 function logout(){localStorage.removeItem('crm_tk');location.reload();}
 
 async function loadApp(){
-  CU=pTk();if(!CU){HL();return;}
+  CU=pTk();
+  if(!CU){
+    localStorage.removeItem('crm_tk');
+    HL();
+    // Mostrar tela de login
+    document.getElementById('LB').style.display='block';
+    document.getElementById('AW').style.display='flex';
+    document.getElementById('APP').style.display='none';
+    return;
+  }
+  // Verificar se falta menos de 1h para expirar e avisar
+  if(CU.exp && (CU.exp - Date.now()/1000) < 3600){
+    toast('Sua sessão expira em breve. Salve seu trabalho.','err');
+  }
   document.getElementById('AW').style.display='none';
   document.getElementById('APP').style.display='flex';
   buildSidebar();await fetchAll();
@@ -444,7 +468,7 @@ async function fetchAll(){
     const ps=[fetch(API+'/deals',{headers:hd()}),fetch(API+'/vendedores',{headers:hd()}),fetch(API+'/atividades',{headers:hd()}),fetch(API+'/metas',{headers:hd()}),fetch(API+'/regioes',{headers:hd()}),fetch(API+'/empresas',{headers:hd()})];
     if(CU.role==='diretor')ps.push(fetch(API+'/usuarios',{headers:hd()}));
     const rs=await Promise.all(ps);
-    if(rs[0].status===401){logout();return;}
+    if(rs[0].status===401){toast('Sessão expirada. Faça login novamente.','err');setTimeout(logout,1500);return;}
     deals=(await rs[0].json()).map(d=>({...d,activity:d.activity||[]}));
     vends=await rs[1].json();atvs=await rs[2].json();metas=await rs[3].json();regs=await rs[4].json();
     try{emps=await rs[5].json();}catch{emps=[];}
@@ -512,6 +536,73 @@ function buildMetaF(){
   SERVS.forEach(s=>{h+=`<div class="fg"><label>${s}</label><input type="number" id="mf_${s.replace(/\W/g,'_')}" placeholder="0" min="0"></div>`;});
   h+='</div>';e.innerHTML=h;
 }
+
+// ─── AUTOCOMPLETE EMPRESAS ───
+function acEmp(input, listId) {
+  const q = (input.value||'').trim().toLowerCase();
+  const list = document.getElementById(listId);
+  if (!list) return;
+
+  // Coletar nomes únicos de empresas cadastradas + dos deals
+  const names = new Set();
+  (emps || []).forEach(e => e.nome && names.add(e.nome));
+  (deals || []).forEach(d => d.company && names.add(d.company));
+
+  const filtered = q
+    ? [...names].filter(n => n.toLowerCase().includes(q)).slice(0, 8)
+    : [...names].slice(0, 8);
+
+  const exactMatch = [...names].some(n => n.toLowerCase() === q);
+
+  let html = filtered.map(n =>
+    `<div class="ac-item" onmousedown="pickEmp('${n.replace(/'/g,"\'")}','${input.id}','${listId}')">${n}</div>`
+  ).join('');
+
+  // Oferecer cadastrar nova se digitou algo e não é exata
+  if (q && !exactMatch) {
+    html += `<div class="ac-item" onmousedown="cadastrarEmpRapido('${q.replace(/'/g,"\'")}','${input.id}','${listId}')">
+      <span>Cadastrar "<strong>${q}</strong>"</span>
+      <span class="ac-new">+ Nova empresa</span>
+    </div>`;
+  }
+
+  list.innerHTML = html;
+  list.style.display = (filtered.length || q) ? 'block' : 'none';
+}
+
+function pickEmp(nome, inputId, listId) {
+  document.getElementById(inputId).value = nome;
+  document.getElementById(listId).style.display = 'none';
+  // Preencher campos do deal se vier do modal de negócios
+  const emp = (emps || []).find(e => e.nome === nome);
+  if (emp && inputId === 'dCo') {
+    if (!document.getElementById('dCt')?.value && emp.contacts?.[0]?.nome) sv('dCt', emp.contacts[0].nome);
+    if (!document.getElementById('dEm')?.value && emp.email) sv('dEm', emp.email);
+    if (!document.getElementById('dPh')?.value && emp.telefone) sv('dPh', emp.telefone);
+  }
+}
+
+async function cadastrarEmpRapido(nome, inputId, listId) {
+  document.getElementById(inputId).value = nome;
+  document.getElementById(listId).style.display = 'none';
+  SL('Cadastrando empresa...');
+  try {
+    const r = await ap('/empresas', 'POST', { nome, contacts: [] });
+    if (!emps) emps = [];
+    emps.push({ ...r, nome });
+    toast('Empresa "' + nome + '" cadastrada!');
+  } catch {
+    toast('Empresa registrada sem cadastro prévio.', 'info');
+  }
+  HL();
+}
+
+// Fechar autocomplete ao clicar fora
+document.addEventListener('click', e => {
+  document.querySelectorAll('.ac-list').forEach(l => {
+    if (!l.previousElementSibling?.contains(e.target)) l.style.display = 'none';
+  });
+});
 
 // ─── DASHBOARD ───
 function renderDashboard(mc,tr){
@@ -874,14 +965,14 @@ function renderAtvs(mc,tr){
   mc.innerHTML=items.map(a=>{
     const ic=TICONS[a.tipo]||'📝';
     const tc='t-'+(a.tipo||'outro').toLowerCase().replace(/[^a-z]/g,'').slice(0,3);
-    const dt=a.data?new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+    const dt=(a.data&&a.data!=='')?new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR'):'';
     return`<div class="atv-i">
       <div class="atv-t ${tc}">${ic}</div>
       <div style="flex:1">
         <div style="font-size:.86rem;font-weight:600;margin-bottom:2px">${a.empresa||'—'} · ${a.contato||'—'}</div>
-        <div style="font-size:.76rem;color:var(--mt)">${a.tipo} · ${dt} · ${a.vendedor||'—'}</div>
+        <div style="font-size:.76rem;color:var(--mt)">${a.tipo}${dt?" · "+dt:""} · ${a.vendedor||'—'}</div>
         ${a.observacao?`<div style="font-size:.76rem;color:var(--mt);margin-top:4px">${a.observacao}</div>`:''}
-        ${a.proximo_passo?`<div style="font-size:.73rem;color:var(--ac);margin-top:5px">→ ${a.proximo_passo}${a.proximo_passo_data?' ('+new Date(a.proximo_passo_data+'T12:00:00').toLocaleDateString('pt-BR')+')':''}</div>`:''}
+        ${a.proximo_passo?`<div style="font-size:.73rem;color:var(--ac);margin-top:5px">→ ${a.proximo_passo}${(a.proximo_passo_data&&a.proximo_passo_data!=='Invalid Date'&&a.proximo_passo_data!=='')?(' ('+new Date(a.proximo_passo_data+'T12:00:00').toLocaleDateString('pt-BR')+')')  :''}</div>`:''}
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0">
         <button class="ib" onclick="openAM(${a.id})">✏</button>
@@ -1313,7 +1404,11 @@ function expCSV(){
 async function ap(path,method,body=null){
   const o={method,headers:hd()};if(body)o.body=JSON.stringify(body);
   const r=await fetch(API+path,o);
-  if(r.status===401){logout();return;}
+  if(r.status===401){
+    toast('Sessão expirada. Faça login novamente.','err');
+    setTimeout(logout,1500);
+    throw new Error('Sessão expirada');
+  }
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error||'Erro na API');}
   return r.json().catch(()=>({}));
 }

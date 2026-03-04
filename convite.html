@@ -4,41 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ativar Conta — ZeusTax CRM</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@200;300;400;500;600;800&family=Barlow+Condensed:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#1a1f2b;--sf:#212836;--sf2:#2b3345;--bd:#2d3d2e;--tx:#e8efe8;--mt:#939fa4;--ac:#4b9560;--ac3:#b6cfae;--gn:#4b9560;--rd:#ef4444}
+  :root{--bg:#0a0f1e;--sf:#0d1529;--sf2:#111d35;--bd:#1a2a4a;--tx:#e8eaf0;--mt:#6b7280;--ac:#0099e6;--gn:#22c55e;--rd:#ef4444}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-  .box{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:40px;width:440px;max-width:100%}
-  .logo{display:flex;align-items:center;gap:4px;margin-bottom:28px}
-  .logo span{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.5rem;text-transform:uppercase;letter-spacing:.03em}
-  .logo span:first-child{color:#fff}
-  .logo span:last-child{color:var(--ac)}
-  h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.5rem;margin-bottom:6px;text-transform:uppercase;letter-spacing:.02em;color:var(--ac3)}
-  .sub{font-size:.88rem;color:var(--mt);margin-bottom:28px;font-weight:300}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .box{background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:40px;width:440px;max-width:100%}
+  .logo{display:flex;align-items:center;gap:2px;margin-bottom:28px}
+  .logo span:first-child{font-weight:700;color:#fff;font-size:1.4rem}
+  .logo span:last-child{font-weight:700;color:var(--ac);font-size:1.4rem}
+  h1{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:6px}
+  .sub{font-size:.85rem;color:var(--mt);margin-bottom:28px}
   .fg{margin-bottom:14px}
-  .fg label{display:block;font-size:.65rem;font-weight:600;color:var(--mt);margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em}
-  .fg input{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:10px 13px;color:var(--tx);font-family:'Barlow',sans-serif;font-size:.88rem;outline:none;transition:border-color .15s}
+  .fg label{display:block;font-size:.7rem;font-weight:600;color:var(--mt);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+  .fg input{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:10px 13px;color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .15s}
   .fg input:focus{border-color:var(--ac)}
-  .fg input:disabled{opacity:.4;cursor:not-allowed}
-  .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:4px;font-size:.68rem;font-weight:600;border:1px solid;margin-bottom:20px;text-transform:uppercase;letter-spacing:.04em}
-  .badge-info{color:var(--ac);border-color:rgba(75,149,96,.3);background:rgba(75,149,96,.1)}
-  .btn{width:100%;padding:11px;border-radius:7px;border:none;cursor:pointer;font-family:'Barlow',sans-serif;font-size:.9rem;font-weight:700;transition:all .15s;margin-top:6px;letter-spacing:.04em;text-transform:uppercase}
+  .fg input:disabled{opacity:.5;cursor:not-allowed}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:500;border:1px solid;margin-bottom:20px}
+  .badge-info{color:var(--ac);border-color:rgba(0,153,230,.3);background:rgba(0,153,230,.1)}
+  .btn{width:100%;padding:11px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;transition:all .15s;margin-top:6px}
   .btn-p{background:var(--ac);color:#fff}
-  .btn-p:hover:not(:disabled){background:#3d7d50;transform:translateY(-1px)}
-  .btn-p:disabled{opacity:.4;cursor:not-allowed;transform:none}
-  .err{color:var(--rd);font-size:.82rem;margin-bottom:14px;padding:9px 13px;background:rgba(239,68,68,.08);border-radius:7px;border:1px solid rgba(239,68,68,.25);display:none}
+  .btn-p:hover:not(:disabled){background:#0088cc;transform:translateY(-1px)}
+  .btn-p:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .err{color:var(--rd);font-size:.82rem;margin-bottom:14px;padding:9px 13px;background:rgba(239,68,68,.1);border-radius:8px;border:1px solid rgba(239,68,68,.3);display:none}
   .success{text-align:center;display:none}
   .success .icon{font-size:3rem;margin-bottom:16px}
-  .success h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.5rem;margin-bottom:8px;text-transform:uppercase;letter-spacing:.02em;color:var(--ac3)}
-  .success p{color:var(--mt);font-size:.88rem;line-height:1.6;margin-bottom:22px;font-weight:300}
+  .success h2{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:8px}
+  .success p{color:var(--mt);font-size:.88rem;line-height:1.6;margin-bottom:22px}
+  .success .btn-p{display:inline-block;padding:11px 28px;text-decoration:none;border-radius:9px;background:var(--ac);color:#fff;font-weight:600;font-size:.9rem}
   .loading{text-align:center;padding:30px 0}
   .sp{width:34px;height:34px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
   @keyframes spin{to{transform:rotate(360deg)}}
   .expired{text-align:center;padding:10px 0}
   .expired .icon{font-size:2.5rem;margin-bottom:14px}
-  .expired p{color:var(--mt);font-size:.88rem;line-height:1.6;font-weight:300}
+  .expired p{color:var(--mt);font-size:.88rem;line-height:1.6}
 </style>
+<link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="favicon-192.png">
+<meta name="theme-color" content="#212836">
 </head>
 <body>
 
@@ -92,8 +97,8 @@
   <div id="stSuccess" class="success">
     <div class="icon">✅</div>
     <h2>Conta ativada!</h2>
-    <p id="successMsg">Sua conta foi criada com sucesso.<br>Clique no botão abaixo para entrar no CRM.</p>
-    <button class="btn btn-p" onclick="irParaCRM()">Acessar o CRM →</button>
+    <p>Sua conta foi criada com sucesso.<br>Você já pode acessar o CRM ZeusTax.</p>
+    <a href="/" class="btn-p" onclick="irParaLogin()">Entrar no CRM →</a>
   </div>
 </div>
 
@@ -180,8 +185,8 @@ async function ativar() {
       return;
     }
 
+    // Salvar token JWT e redirecionar
     if (d.token) localStorage.setItem('crm_tk', d.token);
-    document.getElementById('successMsg').innerHTML = `Olá, <strong>${nome}</strong>! Sua conta foi criada com sucesso.<br>Clique no botão abaixo para entrar no CRM.`;
     show('stSuccess');
   } catch {
     setErr('Erro de conexão. Tente novamente.');
@@ -190,8 +195,8 @@ async function ativar() {
   }
 }
 
-function irParaCRM() {
-  window.location.href = 'https://crm.zeustax.com.br';
+function irParaLogin() {
+  window.location.href = '/';
 }
 
 // Permitir Enter para submeter
